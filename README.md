@@ -8,4 +8,6 @@ This repo is for running a service that allows people to search whether a given 
     - [ ] Determine the length of the suffix array, size of pointers
     - [ ] Implement boolean contains function with off disk binary search
     - [ ] Refactor to count occurrences by splitting to do two binary search after detecting a copy
+    - [ ] Create benchmark, compare against rust memmap version
 - [ ] Create a server that exposes search functionality
+    - [ ] Accept post requests with query in body, eventually dataset as well. Sent response with count 
