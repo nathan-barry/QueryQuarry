@@ -2,14 +2,13 @@ package search
 
 import (
 	"encoding/binary"
-	"fmt"
 	"log"
 	"os"
 )
 
 func CountOccurrences(filename, query string) int64 {
-	fmt.Println("filename:", filename)
-	fmt.Println("query:", query)
+	// fmt.Println("filename:", filename)
+	// fmt.Println("query:", query)
 
 	// Open files
 	textFile, err := os.Open(filename)
@@ -24,8 +23,8 @@ func CountOccurrences(filename, query string) int64 {
 	defer saFile.Close()
 
 	pointerSize, saSize := getSAInfo(textFile, saFile)
-	fmt.Println("SA pointer size:", pointerSize)
-	fmt.Println("SA Size:", saSize)
+	// fmt.Println("SA pointer size:", pointerSize)
+	// fmt.Println("SA Size:", saSize)
 
 	low, high := int64(0), saSize-1
 
@@ -47,12 +46,12 @@ func CountOccurrences(filename, query string) int64 {
 			log.Fatalf("failed to read text: %v", err)
 		}
 
-		fmt.Printf("mid: %v, substr: %s\n", mid, substr)
+		// fmt.Printf("mid: %v, substr: %s\n", mid, substr)
 
 		if substr == query {
 			fo := findFirstOccurrence(textFile, saFile, pointerSize, saSize, mid, query)
 			lo := findLastOccurrence(textFile, saFile, pointerSize, saSize, mid, query)
-			fmt.Printf("First Occurrence: %v, Last Occurrence: %v\n", fo, lo)
+			// fmt.Printf("First Occurrence: %v, Last Occurrence: %v\n", fo, lo)
 			return lo - fo + 1
 		} else if substr < query {
 			low = mid + 1
@@ -88,7 +87,7 @@ func findFirstOccurrence(textFile, saFile *os.File, pointerSize, saSize, mid int
 			log.Fatalf("failed to read text: %v", err)
 		}
 
-		fmt.Printf("mid: %v, substr: %s\n", mid, substr)
+		// fmt.Printf("mid: %v, substr: %s\n", mid, substr)
 
 		if substr == query {
 			firstOccurrence = mid
@@ -99,8 +98,6 @@ func findFirstOccurrence(textFile, saFile *os.File, pointerSize, saSize, mid int
 			high = mid - 1
 		}
 	}
-
-	fmt.Println("First Query:", substr)
 	return firstOccurrence
 }
 
@@ -128,7 +125,7 @@ func findLastOccurrence(textFile, saFile *os.File, pointerSize, saSize, mid int6
 			log.Fatalf("failed to read text: %v", err)
 		}
 
-		fmt.Printf("mid: %v, substr: %s\n", mid, substr)
+		// fmt.Printf("mid: %v, substr: %s\n", mid, substr)
 
 		if substr == query {
 			lastOccurrence = mid
@@ -139,8 +136,6 @@ func findLastOccurrence(textFile, saFile *os.File, pointerSize, saSize, mid int6
 			high = mid - 1
 		}
 	}
-
-	fmt.Println("Last Query:", substr)
 	return lastOccurrence
 }
 

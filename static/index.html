@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Query Quarry</title>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Enter Your Query</h1>
+            <input type="text" id="queryInput" placeholder="Enter your query here...">
+            <button onclick="sendQuery()">Send</button>
+            <p id="result"></p>
+        </div>
+
+        <script>
+            function sendQuery() {
+                var query = document.getElementById("queryInput").value;
+                if (query === "") {
+                    alert("Please enter a query.");
+                    return;
+                }
+                fetch("http://localhost:8080/query", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        length: query.length,
+                        query: query
+                    }),
+                    headers: {
+                        "Content-type": "application/json; charset=UTF-8"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data)
+                    document.getElementById('result').innerText = `Number of Occurrences: ${data.occurrences}`;
+                })
+                .catch(error => console.error("Error:", error))
+            }
+        </script>
+    </body>
+</html>
