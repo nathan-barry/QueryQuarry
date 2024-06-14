@@ -53,7 +53,7 @@ func CountOccurrences(filename, query string) int64 {
 			fo := findFirstOccurrence(textFile, saFile, pointerSize, saSize, mid, query)
 			lo := findLastOccurrence(textFile, saFile, pointerSize, saSize, mid, query)
 			fmt.Printf("First Occurrence: %v, Last Occurrence: %v\n", fo, lo)
-			return lo - fo
+			return lo - fo + 1
 		} else if substr < query {
 			low = mid + 1
 		} else {
