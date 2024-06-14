@@ -27,14 +27,37 @@ func CountOccurrences(filename, query string) int {
 	fmt.Println("SA pointer size:", pointerSize)
 	fmt.Println("SA Size:", saSize)
 
-	textIndex, err := readSuffixArray(saFile, pointerSize, saSize/2)
-	fmt.Println("text index", textIndex)
+	low, high := int64(0), saSize-1
 
-	querySize := int64(len(query))
-	stringBytes, err := readText(textFile, textIndex, querySize)
-	fmt.Println("string", string(stringBytes))
+	for low <= high {
+		mid := (low + high) / 2
 
-	return 0
+		textIndex, err := readSuffixArray(saFile, pointerSize, mid)
+		if err != nil {
+			log.Fatalf("failed to read suffix array: %v", err)
+		}
+
+		querySize := int64(len(query))
+		if querySize > saSize-textIndex {
+			querySize = saSize - textIndex
+		}
+
+		substr, err := readText(textFile, textIndex, querySize)
+		if err != nil {
+			log.Fatalf("failed to read text: %v", err)
+		}
+
+		fmt.Printf("mid: %v, substr: %s\n", mid, substr)
+
+		if substr == query {
+			return 1
+		} else if substr < query {
+			low = mid + 1
+		} else {
+			high = mid - 1
+		}
+	}
+	return -1
 }
 
 func getSAInfo(textFile, saFile *os.File) (int64, int64) {
@@ -70,7 +93,7 @@ func readSuffixArray(saFile *os.File, pointerSize, index int64) (int64, error) {
 	return int64(binary.LittleEndian.Uint64(fullBuf)), nil
 }
 
-func readText(textFile *os.File, start, length int64) ([]byte, error) {
+func readText(textFile *os.File, start, length int64) (string, error) {
 	_, err := textFile.Seek(start, 0)
 	if err != nil {
 		log.Fatalf("failed to seek textFile: %v", err)
@@ -82,5 +105,5 @@ func readText(textFile *os.File, start, length int64) ([]byte, error) {
 		log.Fatalf("failed to read bytes from saFile: %v", err)
 	}
 
-	return buf, nil
+	return string(buf), nil
 }
