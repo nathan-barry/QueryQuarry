@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 )
 
 func CountOccurrences(filename, query string) int64 {
@@ -50,8 +51,33 @@ func CountOccurrences(filename, query string) int64 {
 		fmt.Printf("mid: %v, substr: %s\n", mid, substr)
 
 		if substr == query {
-			fo := findFirstOccurrence(textFile, saFile, pointerSize, saSize, mid, query)
-			lo := findLastOccurrence(textFile, saFile, pointerSize, saSize, mid, query)
+			var wg sync.WaitGroup
+			var fo, lo int64
+
+			wg.Add(2)
+
+			// Open files
+			textFile2, err := os.Open(filename)
+			if err != nil {
+				log.Fatalf("failed to open file: %v", err)
+			}
+			saFile2, err := os.Open(filename + ".table.bin")
+			if err != nil {
+				log.Fatalf("failed to open file: %v", err)
+			}
+			defer textFile2.Close()
+			defer saFile2.Close()
+
+			go func() {
+				defer wg.Done()
+				fo = findFirstOccurrence(textFile, saFile, pointerSize, saSize, mid, query)
+			}()
+			go func() {
+				defer wg.Done()
+				lo = findLastOccurrence(textFile2, saFile2, pointerSize, saSize, mid, query)
+			}()
+			wg.Wait()
+
 			fmt.Printf("First Occurrence: %v, Last Occurrence: %v\n", fo, lo)
 			return lo - fo + 1
 		} else if substr < query {
