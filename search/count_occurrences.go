@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func CountOccurrences(filename, query string) int {
+func CountOccurrences(filename, query string) int64 {
 	fmt.Println("filename:", filename)
 	fmt.Println("query:", query)
 
@@ -50,14 +50,98 @@ func CountOccurrences(filename, query string) int {
 		fmt.Printf("mid: %v, substr: %s\n", mid, substr)
 
 		if substr == query {
-			return 1
+			fo := findFirstOccurrence(textFile, saFile, pointerSize, saSize, mid, query)
+			lo := findLastOccurrence(textFile, saFile, pointerSize, saSize, mid, query)
+			fmt.Printf("First Occurrence: %v, Last Occurrence: %v\n", fo, lo)
+			return lo - fo
 		} else if substr < query {
 			low = mid + 1
 		} else {
 			high = mid - 1
 		}
 	}
-	return -1
+	return int64(-1)
+}
+
+func findFirstOccurrence(textFile, saFile *os.File, pointerSize, saSize, mid int64, query string) int64 {
+	low, high := int64(0), mid
+
+	firstOccurrence := int64(-1)
+
+	var substr string
+
+	for low <= high {
+		mid := (low + high) / 2
+
+		textIndex, err := readSuffixArray(saFile, pointerSize, mid)
+		if err != nil {
+			log.Fatalf("failed to read suffix array: %v", err)
+		}
+
+		querySize := int64(len(query))
+		if querySize > saSize-textIndex {
+			querySize = saSize - textIndex
+		}
+
+		substr, err = readText(textFile, textIndex, querySize)
+		if err != nil {
+			log.Fatalf("failed to read text: %v", err)
+		}
+
+		fmt.Printf("mid: %v, substr: %s\n", mid, substr)
+
+		if substr == query {
+			firstOccurrence = mid
+			high = mid - 1 // continue searching left half
+		} else if substr < query {
+			low = mid + 1
+		} else {
+			high = mid - 1
+		}
+	}
+
+	fmt.Println("First Query:", substr)
+	return firstOccurrence
+}
+
+func findLastOccurrence(textFile, saFile *os.File, pointerSize, saSize, mid int64, query string) int64 {
+	low, high := mid, saSize
+
+	lastOccurrence := int64(-1)
+	var substr string
+
+	for low <= high {
+		mid := (low + high) / 2
+
+		textIndex, err := readSuffixArray(saFile, pointerSize, mid)
+		if err != nil {
+			log.Fatalf("failed to read suffix array: %v", err)
+		}
+
+		querySize := int64(len(query))
+		if querySize > saSize-textIndex {
+			querySize = saSize - textIndex
+		}
+
+		substr, err = readText(textFile, textIndex, querySize)
+		if err != nil {
+			log.Fatalf("failed to read text: %v", err)
+		}
+
+		fmt.Printf("mid: %v, substr: %s\n", mid, substr)
+
+		if substr == query {
+			lastOccurrence = mid
+			low = mid + 1 // continue searching right half
+		} else if substr < query {
+			low = mid + 1
+		} else {
+			high = mid - 1
+		}
+	}
+
+	fmt.Println("Last Query:", substr)
+	return lastOccurrence
 }
 
 func getSAInfo(textFile, saFile *os.File) (int64, int64) {
