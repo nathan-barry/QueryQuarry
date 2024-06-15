@@ -35,6 +35,12 @@ textarea {
     box-sizing: border-box;
     resize: vertical;
 }
+.controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1em;
+}
 button {
     background-color: #f97316;
     color: #fff;
@@ -59,9 +65,4 @@ a:hover {
 .link-separator {
     color: #ccc;
     margin: 0 0.3em;
-}
-#result {
-    font-size: 1em;
-    margin-top: 1em;
-    color: #333;
 }

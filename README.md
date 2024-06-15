@@ -9,3 +9,4 @@ This repo is for running a service that allows people to search whether a given 
 - [X] Implement CLI tool
 - [ ] Add more features to API
     - [ ] Send next X characters from first 10 string matches
+    - [ ] Include the documents IDs where matches appear

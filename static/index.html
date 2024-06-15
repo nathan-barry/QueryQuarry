@@ -15,15 +15,24 @@
             <a href="about">About</a>
         </span>
 
-        <p>This tool is used for LLM data contamination research, copyright detection, and more. If a model outputs a string of 50 words that appears in this dataset, there is a high probability that it is leaking data it was trained on.</p>
+        <p>This tool is used for LLM data contamination research, copyright detection, and more. If a model outputs a string of 50 words that appears in this dataset, there is an extremely high probability it is leaking data it was trained on.</p>
         <p>Enter a query to check how many times it appears in Wiki40b.</p>
 
-        <textarea id="queryInput" placeholder="Enter your query here..."></textarea>
-        <button onclick="sendQuery()">Send</button>
+        <textarea id="queryInput" placeholder="Enter your query here..." oninput="updateWordCount()"></textarea>
+        <div class="controls">
+            <button onclick="sendQuery()">Send</button>
+            <p id="wordCount">Word Count: 0</p>
+        </div>
         <p id="result"></p>
     </div>
 
     <script>
+        function updateWordCount() {
+            var query = document.getElementById("queryInput").value;
+            var wordCount = query.trim() === "" ? 0 : query.trim().split(/\s+/).length;
+            document.getElementById("wordCount").innerText = `Number of Words: ${wordCount}`;
+        }
+
         function sendQuery() {
             var query = document.getElementById("queryInput").value;
             if (query === "") {
