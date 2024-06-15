@@ -2,7 +2,6 @@ package search
 
 import (
 	"encoding/binary"
-	"fmt"
 	"log"
 	"os"
 )
@@ -42,7 +41,6 @@ func CountOccurrences(filename, query string) int64 {
 			// Match, perform binary search twice to find count
 			fo := findFirstOccurrence(textFile, saFile, pointerSize, saSize, mid, query)
 			lo := findLastOccurrence(textFile, saFile, pointerSize, saSize, mid, query)
-			fmt.Printf("first: %v, last: %v\n", fo, lo)
 			return lo - fo + 1
 		} else if substr < query {
 			low = mid + 1

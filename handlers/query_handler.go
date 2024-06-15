@@ -14,6 +14,7 @@ import (
 const WIKI_40B = "data/wiki40b.test"
 
 func QueryHandler(w http.ResponseWriter, r *http.Request) {
+
 	t := time.Now()
 
 	// Read body
@@ -35,11 +36,12 @@ func QueryHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("Invalid JSON")
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 	}
+	fmt.Println("Query:", data.Query)
 
 	// Count occurrences
 	count := search.CountOccurrences(WIKI_40B, data.Query)
-	fmt.Println("count:", count)
-	fmt.Println("Time taken:", time.Since(t).Seconds())
+	fmt.Println("\tCount:", count)
+	fmt.Println("\tTime taken:", time.Since(t).Seconds())
 
 	// Send result back
 	response := ResponseData{Occurrences: count}
