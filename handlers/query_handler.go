@@ -11,7 +11,12 @@ import (
 	"github.com/nathan-barry/query-quarry/search"
 )
 
+const WIKI_40B = "data/wiki40b.test"
+
 func QueryHandler(w http.ResponseWriter, r *http.Request) {
+	t := time.Now()
+
+	// Read body
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Fatal("Error reading body")
@@ -23,24 +28,20 @@ func QueryHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Body is empty", http.StatusBadRequest)
 	}
 
+	// Unmarshal request data
 	var data RequestData
 	err = json.Unmarshal(body, &data)
-	fmt.Println("Body:", string(body))
-	fmt.Println("JSON:", data)
 	if err != nil {
 		log.Fatal("Invalid JSON")
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 	}
-	fmt.Println("data.Length", data.Length)
-	fmt.Println("data.Query", data.Query)
 
-	filename := "data/wiki40b.test"
-	t := time.Now()
-
-	count := search.CountOccurrences(filename, data.Query)
+	// Count occurrences
+	count := search.CountOccurrences(WIKI_40B, data.Query)
 	fmt.Println("count:", count)
 	fmt.Println("Time taken:", time.Since(t).Seconds())
 
+	// Send result back
 	response := ResponseData{Occurrences: count}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)

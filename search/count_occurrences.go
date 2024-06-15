@@ -2,14 +2,12 @@ package search
 
 import (
 	"encoding/binary"
+	"fmt"
 	"log"
 	"os"
 )
 
 func CountOccurrences(filename, query string) int64 {
-	// fmt.Println("filename:", filename)
-	// fmt.Println("query:", query)
-
 	// Open files
 	textFile, err := os.Open(filename)
 	if err != nil {
@@ -23,35 +21,28 @@ func CountOccurrences(filename, query string) int64 {
 	defer saFile.Close()
 
 	pointerSize, saSize := getSAInfo(textFile, saFile)
-	// fmt.Println("SA pointer size:", pointerSize)
-	// fmt.Println("SA Size:", saSize)
 
+	// Binary search until match
 	low, high := int64(0), saSize-1
-
 	for low <= high {
 		mid := (low + high) / 2
 
-		textIndex, err := readSuffixArray(saFile, pointerSize, mid)
-		if err != nil {
-			log.Fatalf("failed to read suffix array: %v", err)
-		}
+		textIndex := readSuffixArray(saFile, pointerSize, mid)
 
 		querySize := int64(len(query))
 		if querySize > saSize-textIndex {
+			// TODO: This is currently truncating the query, not correct
+			// Is setting `high = mid - 1` correct?
 			querySize = saSize - textIndex
 		}
 
-		substr, err := readText(textFile, textIndex, querySize)
-		if err != nil {
-			log.Fatalf("failed to read text: %v", err)
-		}
-
-		// fmt.Printf("mid: %v, substr: %s\n", mid, substr)
+		substr := readText(textFile, textIndex, querySize)
 
 		if substr == query {
+			// Match, perform binary search twice to find count
 			fo := findFirstOccurrence(textFile, saFile, pointerSize, saSize, mid, query)
 			lo := findLastOccurrence(textFile, saFile, pointerSize, saSize, mid, query)
-			// fmt.Printf("First Occurrence: %v, Last Occurrence: %v\n", fo, lo)
+			fmt.Printf("first: %v, last: %v\n", fo, lo)
 			return lo - fo + 1
 		} else if substr < query {
 			low = mid + 1
@@ -59,35 +50,26 @@ func CountOccurrences(filename, query string) int64 {
 			high = mid - 1
 		}
 	}
-	return int64(-1)
+
+	return 0
 }
 
 func findFirstOccurrence(textFile, saFile *os.File, pointerSize, saSize, mid int64, query string) int64 {
+	firstOccurrence := mid
+
+	// Binary search
 	low, high := int64(0), mid
-
-	firstOccurrence := int64(-1)
-
-	var substr string
-
 	for low <= high {
 		mid := (low + high) / 2
 
-		textIndex, err := readSuffixArray(saFile, pointerSize, mid)
-		if err != nil {
-			log.Fatalf("failed to read suffix array: %v", err)
-		}
+		textIndex := readSuffixArray(saFile, pointerSize, mid)
 
 		querySize := int64(len(query))
 		if querySize > saSize-textIndex {
 			querySize = saSize - textIndex
 		}
 
-		substr, err = readText(textFile, textIndex, querySize)
-		if err != nil {
-			log.Fatalf("failed to read text: %v", err)
-		}
-
-		// fmt.Printf("mid: %v, substr: %s\n", mid, substr)
+		substr := readText(textFile, textIndex, querySize)
 
 		if substr == query {
 			firstOccurrence = mid
@@ -102,30 +84,21 @@ func findFirstOccurrence(textFile, saFile *os.File, pointerSize, saSize, mid int
 }
 
 func findLastOccurrence(textFile, saFile *os.File, pointerSize, saSize, mid int64, query string) int64 {
+	lastOccurrence := mid
+
+	// Binary search
 	low, high := mid, saSize
-
-	lastOccurrence := int64(-1)
-	var substr string
-
 	for low <= high {
 		mid := (low + high) / 2
 
-		textIndex, err := readSuffixArray(saFile, pointerSize, mid)
-		if err != nil {
-			log.Fatalf("failed to read suffix array: %v", err)
-		}
+		textIndex := readSuffixArray(saFile, pointerSize, mid)
 
 		querySize := int64(len(query))
 		if querySize > saSize-textIndex {
 			querySize = saSize - textIndex
 		}
 
-		substr, err = readText(textFile, textIndex, querySize)
-		if err != nil {
-			log.Fatalf("failed to read text: %v", err)
-		}
-
-		// fmt.Printf("mid: %v, substr: %s\n", mid, substr)
+		substr := readText(textFile, textIndex, querySize)
 
 		if substr == query {
 			lastOccurrence = mid
@@ -152,7 +125,7 @@ func getSAInfo(textFile, saFile *os.File) (int64, int64) {
 	return saFileInfo.Size() / textFileInfo.Size(), textFileInfo.Size()
 }
 
-func readSuffixArray(saFile *os.File, pointerSize, index int64) (int64, error) {
+func readSuffixArray(saFile *os.File, pointerSize, index int64) int64 {
 	offset := index * pointerSize
 
 	_, err := saFile.Seek(offset, 0)
@@ -169,10 +142,10 @@ func readSuffixArray(saFile *os.File, pointerSize, index int64) (int64, error) {
 	fullBuf := make([]byte, 8)
 	copy(fullBuf, buf)
 
-	return int64(binary.LittleEndian.Uint64(fullBuf)), nil
+	return int64(binary.LittleEndian.Uint64(fullBuf))
 }
 
-func readText(textFile *os.File, start, length int64) (string, error) {
+func readText(textFile *os.File, start, length int64) string {
 	_, err := textFile.Seek(start, 0)
 	if err != nil {
 		log.Fatalf("failed to seek textFile: %v", err)
@@ -181,8 +154,8 @@ func readText(textFile *os.File, start, length int64) (string, error) {
 	buf := make([]byte, length)
 	_, err = textFile.Read(buf)
 	if err != nil {
-		log.Fatalf("failed to read bytes from saFile: %v", err)
+		log.Fatalf("failed to read bytes from textFile: %v", err)
 	}
 
-	return string(buf), nil
+	return string(buf)
 }
