@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/nathan-barry/query-quarry/search"
+	"github.com/nathan-barry/QueryQuarry/search"
 )
 
 const WIKI_40B = "data/wiki40b.test"

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QueryQuarry</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>About</h1>
+        <span>
+            <a href="https://github.com/nathan-barry/QueryQuarry">Github</a>
+            <span class="link-separator">|</span>
+            <a href="/">Back</a>
+        </span>
+
+        <br>
+        <br>
+        <p>This tool was made by Nathan Barry, a CS and Math undergraduate student at UT Austin, while working at <a href="https://www.arlut.utexas.edu/">Applied Research Laboratories</a>, a university affiliated research center.</p>
+
+        <br>
+        <h2>Why This Project?</h2>
+        <p>Data contamination is a large issue in the current LLM space. From the paper <a href="">Can we trust the evaluation on ChatGPT?</a>, the authors beg the question: </p>
+
+        <p><i>"Given that ChatGPT is a closed model without [publicly available] information about its training dataset and how it is currently being trained, there is a large loxodonta mammal in the room: how can we know whether ChatGPT has not been contaminated with the evaluation datasets?"</i></p>
+
+        <p>This question affects every NLP researcher and was a problem I ran into time and time again when doing my own evaluations.</p>
+
+        <p>The papers <a href="">What's in My Big Data?</a> (AI2) and <a href="">Scalable Extraction of Training Data from (Production) Language Models</a> (Google Research) both constructed data structures on large corpa that allowed for efficient exact string lookup. Both papers required google cloud compute nodes with (882GB RAM, 224 CPUs) and (1.4TB RAM, 176 CPUs) respectively, expensive hardware that is out of reach for most researchers.</p>
+
+        <p>While the AI2 paper allows access to their search functionality, it is restricted due to the expensive nature of ElasticSearch and the Inverted Index data structure they used which, while more flexible, requires high memory and many cores to do search efficiently. The Google Research paper used Suffix Arrays which performs the lookup using binary search, which is a sequential algorithm and thus does not require much RAM to perform.</p>
+
+        <p>The Google Research paper used code from a previous Google Research paper, <a href="">Deduplicating Training Data Makes Language Models Better</a>, to construct the Suffix Array. While this implementation does construct it using external memory, it does have the requirement that the initial dataset can fit into memory, thus still requiring expensive machines to construct the data structures.</p>
+
+        <p>This project aims to host search functionality on a variety of popular large datasets. We use the aforementioned <a href="https://github.com/google-research/deduplicate-text-datasets">Google Research repository</a> to construct these large data structures and then provide a free service that allows anyone to do exact string lookup with the hope that it allows more people to do research in the space.</p>
+    </div>
+</body>
+</html>

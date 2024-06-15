@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/nathan-barry/query-quarry/handlers"
+	"github.com/nathan-barry/QueryQuarry/handlers"
 )
 
 const LOCALHOST = "http://localhost:8080/query"

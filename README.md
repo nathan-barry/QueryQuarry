@@ -1,13 +1,11 @@
-# query-quarry
+# QueryQuarry
 
 This repo is for running a service that allows people to search whether a given text appears in a common LLM training dataset. Examples of potential uses are detecting copyrighted material, dataset contamination, etc.
 
 ## TODO
-- [ ] Create the binary search function
-    - [ ] Create data repo and figure out structure of files
-    - [ ] Determine the length of the suffix array, size of pointers
-    - [ ] Implement boolean contains function with off disk binary search
-    - [ ] Refactor to count occurrences by splitting to do two binary search after detecting a copy
-    - [ ] Create benchmark, compare against rust memmap version
-- [ ] Create a server that exposes search functionality
-    - [ ] Accept post requests with query in body, eventually dataset as well. Sent response with count 
+- [X] Implement disk binary search
+- [X] Implement server and API
+- [X] Implement the front end 
+- [X] Implement CLI tool
+- [ ] Add more features to API
+    - [ ] Send next X characters from first 10 string matches

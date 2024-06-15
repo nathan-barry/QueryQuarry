@@ -1,42 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Query Quarry</title>
-    </head>
-    <body>
-        <div class="container">
-            <h1>Enter Your Query</h1>
-            <input type="text" id="queryInput" placeholder="Enter your query here...">
-            <button onclick="sendQuery()">Send</button>
-            <p id="result"></p>
-        </div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QueryQuarry</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>QueryQuarry: Exact String Match on Internet-Sized Data</h1>
+        <span>
+            <a href="https://github.com/nathan-barry/QueryQuarry">Github</a>
+            <span class="link-separator">|</span>
+            <a href="about">About</a>
+        </span>
 
-        <script>
-            function sendQuery() {
-                var query = document.getElementById("queryInput").value;
-                if (query === "") {
-                    alert("Please enter a query.");
-                    return;
-                }
-                fetch("http://localhost:8080/query", {
-                    method: "POST",
-                    body: JSON.stringify({
-                        length: query.length,
-                        query: query
-                    }),
-                    headers: {
-                        "Content-type": "application/json; charset=UTF-8"
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data)
-                    document.getElementById('result').innerText = `Number of Occurrences: ${data.occurrences}`;
-                })
-                .catch(error => console.error("Error:", error))
+        <p>This tool is used for LLM data contamination research, copyright detection, and more. If a model outputs a string of 50 words that appears in this dataset, there is a high probability that it is leaking data it was trained on.</p>
+        <p>Enter a query to check how many times it appears in Wiki40b.</p>
+
+        <textarea id="queryInput" placeholder="Enter your query here..."></textarea>
+        <button onclick="sendQuery()">Send</button>
+        <p id="result"></p>
+    </div>
+
+    <script>
+        function sendQuery() {
+            var query = document.getElementById("queryInput").value;
+            if (query === "") {
+                alert("Please enter a query.");
+                return;
             }
-        </script>
-    </body>
+            fetch("http://localhost:8080/query", {
+                method: "POST",
+                body: JSON.stringify({
+                    length: query.length,
+                    query: query
+                }),
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data)
+                document.getElementById('result').innerText = `Number of Occurrences: ${data.occurrences}`;
+            })
+            .catch(error => console.error("Error:", error))
+        }
+    </script>
+</body>
 </html>
