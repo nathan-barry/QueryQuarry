@@ -10,3 +10,5 @@ This repo is for running a service that allows people to search whether a given 
 - [ ] Add more features to API
     - [ ] Send next X characters from first 10 string matches
     - [ ] Include the documents IDs where matches appear
+- [ ] Add documentation to README
+- [ ] Add markdown file with available models and crowdsourced insights for each 
