@@ -59,6 +59,13 @@ func QueryHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("\tCount:", count)
 	fmt.Println("\tTime taken:", time.Since(t).Seconds())
 
+	if true {
+		docIDs, textStarts := search.FindDocuments(textFile, saFile, firstSAIndex, lastSAIndex)
+		fmt.Println("\tdocIDs:", docIDs)
+		fmt.Println("\ttextStarts:", textStarts)
+		fmt.Println("\tTime taken:", time.Since(t).Seconds())
+	}
+
 	// Send result back
 	response := ResponseData{Occurrences: count}
 	w.Header().Set("Content-Type", "application/json")
@@ -66,10 +73,15 @@ func QueryHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 type RequestData struct {
-	Length int64  `json:"length"`
-	Query  string `json:"query"`
+	Length      int64  `json:"length"`
+	Query       string `json:"query"`
+	DocData     bool   `json:"doc-data"`    // return document IDs and documents
+	Surrounding bool   `json:"surrounding"` // return before and after 50 words of query
 }
 
 type ResponseData struct {
-	Occurrences int64 `json:"occurrences"`
+	Occurrences int64    `json:"occurrences"`
+	DocIDs      []uint32 `json:"doc-ids"`
+	Documenets  []string `json:"documents"`
+	Surrounding []string `json:"surrounding"`
 }

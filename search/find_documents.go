@@ -3,6 +3,7 @@ package search
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"log"
 	"os"
 )
@@ -13,30 +14,35 @@ const CHUNK_SIZE = 4096
 // First is useful for figuring out size of document from the dataset.split.size file
 // Second is the start of the document in the text file.
 // Can do text[textStart[i]:textStart[i]+docSize[i]] to grab entire document
-func FindDocuments(textFile, saFile *os.File, firstSAIndex, lastSAIndex int64) ([]int64, []int64) {
+func FindDocuments(textFile, saFile *os.File, firstSAIndex, lastSAIndex int64) ([]uint32, []int64) {
+	fmt.Println("IN FindDocuments")
 	if firstSAIndex < 0 || lastSAIndex < 0 {
 		log.Fatal("Negative suffix array index, no occurrences")
 	}
 	count := lastSAIndex - firstSAIndex + 1
 
-	docIDs := make([]int64, count)
+	docIDs := make([]uint32, count)
 	textStarts := make([]int64, count)
 
 	pointerSize, _ := getSAInfo(textFile, saFile)
 
+	j := 0
 	// Loop through each occurrence
-	for i := firstSAIndex; i < lastSAIndex; i++ { // TODO: Off by one possibly?
+	for i := firstSAIndex; i <= lastSAIndex; i++ { // TODO: Off by one possibly?
 		// Backwards scan until find ID \ff \ff + 4 bytes
 		// Question: This should be unique? Since it won't be valid unicode?
 		textIndex := readSuffixArray(saFile, pointerSize, i)
 
-		findStartToken(textFile, textIndex, CHUNK_SIZE)
+		docID, startPos := findStartToken(textFile, textIndex, CHUNK_SIZE)
+		docIDs[j] = docID
+		textStarts[j] = startPos
 	}
 
 	return docIDs, textStarts
 }
 
 func findStartToken(textFile *os.File, seekPos, chunkSize int64) (uint32, int64) {
+	fmt.Println("IN FindStartToken")
 	startTokenPrefix := []byte{0xff, 0xff}
 	buf := make([]byte, chunkSize)
 
