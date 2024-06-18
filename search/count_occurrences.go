@@ -9,19 +9,7 @@ import (
 // NOTE: This function allows overlapping sequences to count as different duplicates.
 // So if our string is `aaaa` and we count how many times `aa` occurs, it will return 3,
 // not 2. This is different from python's "aaaa".count("aa") which will say 2.
-func CountOccurrences(filename, query string) int64 {
-	// Open files
-	textFile, err := os.Open(filename)
-	if err != nil {
-		log.Fatalf("failed to open file: %v", err)
-	}
-	saFile, err := os.Open(filename + ".table.bin")
-	if err != nil {
-		log.Fatalf("failed to open file: %v", err)
-	}
-	defer textFile.Close()
-	defer saFile.Close()
-
+func CountOccurrences(textFile, saFile *os.File, query string) (int64, int64) {
 	pointerSize, saSize := getSAInfo(textFile, saFile)
 
 	// Binary search until match
@@ -42,9 +30,9 @@ func CountOccurrences(filename, query string) int64 {
 
 		if substr == query {
 			// Match, perform binary search twice to find count
-			fo := findFirstOccurrence(textFile, saFile, pointerSize, saSize, mid, query)
-			lo := findLastOccurrence(textFile, saFile, pointerSize, saSize, mid, query)
-			return lo - fo + 1
+			firstSAIndex := findFirstOccurrence(textFile, saFile, pointerSize, saSize, mid, query)
+			LastSAIndex := findLastOccurrence(textFile, saFile, pointerSize, saSize, mid, query)
+			return firstSAIndex, LastSAIndex
 		} else if substr < query {
 			low = mid + 1
 		} else {
@@ -52,7 +40,7 @@ func CountOccurrences(filename, query string) int64 {
 		}
 	}
 
-	return 0
+	return -1, -1
 }
 
 func findFirstOccurrence(textFile, saFile *os.File, pointerSize, saSize, mid int64, query string) int64 {
@@ -134,13 +122,13 @@ func readSuffixArray(saFile *os.File, pointerSize, index int64) int64 {
 		log.Fatalf("failed to seek saFile: %v", err)
 	}
 
-	buf := make([]byte, pointerSize)
+	buf := make([]byte, pointerSize) // TODO, move this out and reuse
 	_, err = saFile.Read(buf)
 	if err != nil {
 		log.Fatalf("failed to read bytes from saFile: %v", err)
 	}
 
-	fullBuf := make([]byte, 8)
+	fullBuf := make([]byte, 8) // TODO, move this out and reuse
 	copy(fullBuf, buf)
 
 	return int64(binary.LittleEndian.Uint64(fullBuf))
@@ -152,7 +140,7 @@ func readText(textFile *os.File, start, length int64) string {
 		log.Fatalf("failed to seek textFile: %v", err)
 	}
 
-	buf := make([]byte, length)
+	buf := make([]byte, length) // TODO, move this out and reuse
 	_, err = textFile.Read(buf)
 	if err != nil {
 		log.Fatalf("failed to read bytes from textFile: %v", err)

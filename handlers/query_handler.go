@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/nathan-barry/QueryQuarry/search"
@@ -14,7 +15,6 @@ import (
 const WIKI_40B = "data/wiki40b.test"
 
 func QueryHandler(w http.ResponseWriter, r *http.Request) {
-
 	t := time.Now()
 
 	// Read body
@@ -38,8 +38,24 @@ func QueryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println("Query:", data.Query)
 
+	// Opened in handler since some will use reuse files in multiple functions
+	textFile, err := os.Open(WIKI_40B)
+	if err != nil {
+		log.Fatalf("failed to open file: %v", err)
+	}
+	saFile, err := os.Open(WIKI_40B + ".table.bin")
+	if err != nil {
+		log.Fatalf("failed to open file: %v", err)
+	}
+	defer textFile.Close()
+	defer saFile.Close()
+
 	// Count occurrences
-	count := search.CountOccurrences(WIKI_40B, data.Query)
+	firstSAIndex, lastSAIndex := search.CountOccurrences(textFile, saFile, data.Query)
+	count := lastSAIndex - firstSAIndex + 1
+	if firstSAIndex < 0 || lastSAIndex < 0 { // Both -1 if no occurrences
+		count = 0
+	}
 	fmt.Println("\tCount:", count)
 	fmt.Println("\tTime taken:", time.Since(t).Seconds())
 

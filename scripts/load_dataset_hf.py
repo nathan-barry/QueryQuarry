@@ -55,11 +55,10 @@ else:
 assert isinstance(ds, datasets.Dataset), "This is not a HF-dataset. It might be a DatasetDict. Try passing `split`?"
 
 UID = 0
-
-
 def sep():
     global UID
     UID += 1
+    # No Unicode code point has pattern 0xff 0xff, should be unique
     return b"\xff\xff" + struct.pack("<I", UID)
 
 os.makedirs(save_dir, exist_ok=True)
