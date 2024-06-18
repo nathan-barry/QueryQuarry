@@ -36,6 +36,7 @@ func FindDocuments(textFile, saFile *os.File, firstSAIndex, lastSAIndex int64) (
 		docID, startPos := findStartToken(textFile, textIndex, CHUNK_SIZE)
 		docIDs[j] = docID
 		textStarts[j] = startPos
+		j++
 	}
 
 	return docIDs, textStarts
