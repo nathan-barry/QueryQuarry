@@ -6,6 +6,9 @@ import (
 	"os"
 )
 
+// NOTE: This function allows overlapping sequences to count as different duplicates.
+// So if our string is `aaaa` and we count how many times `aa` occurs, it will return 3,
+// not 2. This is different from python's "aaaa".count("aa") which will say 2.
 func CountOccurrences(filename, query string) int64 {
 	// Open files
 	textFile, err := os.Open(filename)
