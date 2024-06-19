@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QueryQuarry</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="scripts.js" defer></script>
 </head>
 <body>
     <div class="container">
@@ -23,39 +24,10 @@
             <button onclick="sendQuery()">Send</button>
             <p id="wordCount">Word Count: 0</p>
         </div>
-        <p id="result"></p>
+
+        <br>
+        <p id="resultNum"></p>
+        <p id="resultSentences"></p>
     </div>
-
-    <script>
-        function updateWordCount() {
-            var query = document.getElementById("queryInput").value;
-            var wordCount = query.trim() === "" ? 0 : query.trim().split(/\s+/).length;
-            document.getElementById("wordCount").innerText = `Number of Words: ${wordCount}`;
-        }
-
-        function sendQuery() {
-            var query = document.getElementById("queryInput").value;
-            if (query === "") {
-                alert("Please enter a query.");
-                return;
-            }
-            fetch("http://localhost:8080/query", {
-                method: "POST",
-                body: JSON.stringify({
-                    length: query.length,
-                    query: query
-                }),
-                headers: {
-                    "Content-type": "application/json; charset=UTF-8"
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data)
-                document.getElementById('result').innerText = `Number of Occurrences: ${data.occurrences}`;
-            })
-            .catch(error => console.error("Error:", error))
-        }
-    </script>
 </body>
 </html>

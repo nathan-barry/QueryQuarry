@@ -7,8 +7,10 @@ This repo is for running a service that allows people to search whether a given 
 - [X] Implement server and API
 - [X] Implement the front end 
 - [X] Implement CLI tool
-- [ ] Add more features to API
-    - [ ] Send next X characters from first 10 string matches
-    - [ ] Include the documents IDs where matches appear
+- [X] Add more features to API
+    - [X] Grab the surrounding sentences of each occurrence
+    - [X] Find all document IDs and positions of each document with an occurrence 
+        - [ ] Send as CSV file
 - [ ] Add documentation to README
+- [ ] Add graceful error handling
 - [ ] Add markdown file with available models and crowdsourced insights for each 

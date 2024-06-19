@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -36,9 +35,8 @@ func QueryHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("Invalid JSON")
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 	}
-	fmt.Println("Query:", data.Query)
 
-	// Opened in handler since some will use reuse files in multiple functions
+	// Open files
 	textFile, err := os.Open(WIKI_40B)
 	if err != nil {
 		log.Fatalf("failed to open file: %v", err)
@@ -52,29 +50,29 @@ func QueryHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Count occurrences
 	firstSAIndex, lastSAIndex := search.CountOccurrences(textFile, saFile, data.Query)
-	count := lastSAIndex - firstSAIndex + 1
+
+	var count int64
+	var sentences []string
 	if firstSAIndex < 0 || lastSAIndex < 0 { // Both -1 if no occurrences
 		count = 0
+	} else {
+		count = lastSAIndex - firstSAIndex + 1
+		sentences = search.NearbyWords(textFile, saFile, firstSAIndex, lastSAIndex)
 	}
-	fmt.Println("\tCount:", count)
-	fmt.Println("\tTime taken:", time.Since(t).Seconds())
+	log.Printf("QUERY: \"%v\", COUNT: %v, TIME_TAKEN: %v", data.Query, count, time.Since(t).Seconds())
 
 	// Send result back
-	response := ResponseData{Occurrences: count}
+	response := ResponseData{Occurrences: count, Sentences: sentences}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
 
 type RequestData struct {
-	Length      int64  `json:"length"`
-	Query       string `json:"query"`
-	DocData     bool   `json:"doc-data"`    // return document IDs and documents
-	Surrounding bool   `json:"surrounding"` // return before and after 50 words of query
+	Length int64  `json:"length"`
+	Query  string `json:"query"`
 }
 
 type ResponseData struct {
 	Occurrences int64    `json:"occurrences"`
-	DocIDs      []uint32 `json:"doc-ids"`
-	Documenets  []string `json:"documents"`
-	Surrounding []string `json:"surrounding"`
+	Sentences   []string `json:"sentences"`
 }
