@@ -26,8 +26,8 @@ func FindDocuments(textFile, saFile *os.File, firstSAIndex, lastSAIndex int64) (
 
 	pointerSize, _ := getSAInfo(textFile, saFile)
 
-	j := 0
 	// Loop through each occurrence
+	j := 0
 	for i := firstSAIndex; i <= lastSAIndex; i++ { // TODO: Off by one possibly?
 		// Backwards scan until find ID \ff \ff + 4 bytes
 		// Question: This should be unique? Since it won't be valid unicode?

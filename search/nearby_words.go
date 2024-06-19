@@ -13,28 +13,34 @@ func NearbyWords(textFile, saFile *os.File, firstSAIndex, lastSAIndex int64) []s
 	if firstSAIndex < 0 || lastSAIndex < 0 {
 		log.Fatal("Negative suffix array index, no occurrences")
 	}
+
 	count := lastSAIndex - firstSAIndex + 1
-
-	contexts := make([]string, count)
-
-	buf := make([]byte, CONTEXT_SIZE)
-
 	pointerSize, _ := getSAInfo(textFile, saFile)
 
-	j := 0
+	contexts := make([]string, count)
+	buf := make([]byte, CONTEXT_SIZE)
+
 	// Loop through each occurrence
-	for i := firstSAIndex; i <= lastSAIndex; i++ { // TODO: Off by one possibly?
-		// Backwards scan until find ID \ff \ff + 4 bytes
-		// Question: This should be unique? Since it won't be valid unicode?
+	j := 0
+	for i := firstSAIndex; i <= lastSAIndex; i++ {
 		textIndex := readSuffixArray(saFile, pointerSize, i)
 
-		// TODO Handle start edge case
-		textFile.Seek(textIndex-BEFORE_SIZE, 0)
-		textFile.Read(buf)
-		contexts[j] = string(buf)
+		startIndex := textIndex - BEFORE_SIZE
+		if startIndex < 0 {
+			startIndex = 0
+		}
+		textFile.Seek(startIndex, 0)
+
+		n, err := textFile.Read(buf)
+		if err != nil {
+			log.Fatal("Error reading nearby words")
+		}
+		contexts[j] = string(buf[:n])
 
 		j++
 	}
 
 	return contexts
 }
+
+// TODO: Add helper that truncates document if bleeds into another document

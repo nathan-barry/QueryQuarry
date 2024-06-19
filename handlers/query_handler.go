@@ -65,9 +65,10 @@ func QueryHandler(w http.ResponseWriter, r *http.Request) {
 		// fmt.Println("\ttextStarts:", textStarts)
 		// fmt.Println("\tTime taken:", time.Since(t).Seconds())
 
-		contexts := search.NearbyWords(textFile, saFile, firstSAIndex, lastSAIndex)
-		fmt.Println("\tContexts:", contexts)
-		fmt.Println("\tTime taken:", time.Since(t).Seconds())
+		texts := search.NearbyWords(textFile, saFile, firstSAIndex, lastSAIndex)
+		for _, text := range texts {
+			fmt.Println("\tText:", "...", text, "...")
+		}
 	}
 
 	// Send result back
