@@ -59,18 +59,6 @@ func QueryHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("\tCount:", count)
 	fmt.Println("\tTime taken:", time.Since(t).Seconds())
 
-	if true {
-		// docIDs, textStarts := search.FindDocuments(textFile, saFile, firstSAIndex, lastSAIndex)
-		// fmt.Println("\tdocIDs:", docIDs)
-		// fmt.Println("\ttextStarts:", textStarts)
-		// fmt.Println("\tTime taken:", time.Since(t).Seconds())
-
-		texts := search.NearbyWords(textFile, saFile, firstSAIndex, lastSAIndex)
-		for _, text := range texts {
-			fmt.Println("\tText:", "...", text, "...")
-		}
-	}
-
 	// Send result back
 	response := ResponseData{Occurrences: count}
 	w.Header().Set("Content-Type", "application/json")

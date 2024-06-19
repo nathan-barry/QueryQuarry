@@ -8,14 +8,13 @@ import (
 	"os"
 )
 
-const CHUNK_SIZE = 4096
+const CHUNK_SIZE = 8192 // From a little testing, seems like a good size
 
 // This will return two arrays. []int DocIDs, []int textStarts
 // First is useful for figuring out size of document from the dataset.split.size file
 // Second is the start of the document in the text file.
 // Can do text[textStart[i]:textStart[i]+docSize[i]] to grab entire document
 func FindDocuments(textFile, saFile *os.File, firstSAIndex, lastSAIndex int64) ([]uint32, []int64) {
-	fmt.Println("IN FindDocuments")
 	if firstSAIndex < 0 || lastSAIndex < 0 {
 		log.Fatal("Negative suffix array index, no occurrences")
 	}
@@ -43,16 +42,20 @@ func FindDocuments(textFile, saFile *os.File, firstSAIndex, lastSAIndex int64) (
 }
 
 func findStartToken(textFile *os.File, seekPos, chunkSize int64) (uint32, int64) {
-	fmt.Println("IN FindStartToken")
 	startTokenPrefix := []byte{0xff, 0xff}
 	buf := make([]byte, chunkSize)
 
+	fmt.Println("-----------")
+	i := 0
 	for {
+		fmt.Println(i)
+		i++
 		if seekPos < chunkSize {
 			chunkSize = seekPos
 			seekPos = 0
 		} else {
-			seekPos -= chunkSize
+			seekPos -= chunkSize - 6 // slight overlap
+			// TODO: edgecase initial position is last element
 		}
 
 		_, err := textFile.Seek(seekPos, 0)
@@ -66,13 +69,9 @@ func findStartToken(textFile *os.File, seekPos, chunkSize int64) (uint32, int64)
 		}
 
 		index := bytes.LastIndex(buf[:n], startTokenPrefix)
-
 		if index != -1 && index+6 <= n {
 			docID := binary.LittleEndian.Uint32(buf[index+2 : index+6])
 			return docID, seekPos + int64(index)
-		} else {
-			// TODO: Edge case where docID not fully in chunk
-			log.Fatal("DocID not fully in chunk: TODO COMPLETE THIS")
 		}
 
 		if seekPos == 0 {
