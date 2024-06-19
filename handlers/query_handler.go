@@ -51,6 +51,9 @@ func QueryHandler(w http.ResponseWriter, r *http.Request) {
 	// Count occurrences
 	firstSAIndex, lastSAIndex := search.CountOccurrences(textFile, saFile, data.Query)
 
+	countTime := time.Since(t).Seconds()
+	t = time.Now()
+
 	var count int64
 	var sentences []string
 	if firstSAIndex < 0 || lastSAIndex < 0 { // Both -1 if no occurrences
@@ -59,7 +62,8 @@ func QueryHandler(w http.ResponseWriter, r *http.Request) {
 		count = lastSAIndex - firstSAIndex + 1
 		sentences = search.NearbyWords(textFile, saFile, firstSAIndex, lastSAIndex)
 	}
-	log.Printf("QUERY: \"%v\", COUNT: %v, TIME_TAKEN: %v", data.Query, count, time.Since(t).Seconds())
+	log.Printf("QUERY: \"%v\", COUNT: %v, COUNT_TIME: %v, SENTENCE_TIME: %v",
+		data.Query, count, countTime, time.Since(t).Seconds())
 
 	// Send result back
 	response := ResponseData{Occurrences: count, Sentences: sentences}

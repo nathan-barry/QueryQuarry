@@ -7,6 +7,7 @@ import (
 
 const CONTEXT_SIZE = 128
 const BEFORE_SIZE = 32
+const MAX_SENTENCES = 128
 
 // Returns 128 bytes of text where the query appears
 func NearbyWords(textFile, saFile *os.File, firstSAIndex, lastSAIndex int64) []string {
@@ -14,15 +15,22 @@ func NearbyWords(textFile, saFile *os.File, firstSAIndex, lastSAIndex int64) []s
 		log.Fatal("Negative suffix array index, no occurrences")
 	}
 
-	count := lastSAIndex - firstSAIndex + 1
 	pointerSize, _ := getSAInfo(textFile, saFile)
 
-	contexts := make([]string, count)
+	log.Println(lastSAIndex - firstSAIndex)
+
+	if lastSAIndex-firstSAIndex >= MAX_SENTENCES {
+		lastSAIndex = firstSAIndex + MAX_SENTENCES
+	}
+
+	log.Println(lastSAIndex - firstSAIndex)
+
+	sentences := make([]string, lastSAIndex-firstSAIndex)
 	buf := make([]byte, CONTEXT_SIZE)
 
 	// Loop through each occurrence
 	j := 0
-	for i := firstSAIndex; i <= lastSAIndex; i++ {
+	for i := lastSAIndex; i > firstSAIndex; i-- {
 		textIndex := readSuffixArray(saFile, pointerSize, i)
 
 		startIndex := textIndex - BEFORE_SIZE
@@ -35,12 +43,12 @@ func NearbyWords(textFile, saFile *os.File, firstSAIndex, lastSAIndex int64) []s
 		if err != nil {
 			log.Fatal("Error reading nearby words")
 		}
-		contexts[j] = string(buf[:n])
+		sentences[j] = string(buf[:n])
 
 		j++
 	}
 
-	return contexts
+	return sentences
 }
 
 // TODO: Add helper that truncates document if bleeds into another document
