@@ -58,7 +58,8 @@ UID = 0
 def sep():
     global UID
     UID += 1
-    # No Unicode code point has pattern 0xff 0xff, should be unique
+    # No Unicode code point has pattern 0xffff, should be unique
+    # First looks like ffff00000001, increment
     return b"\xff\xff" + struct.pack("<I", UID)
 
 os.makedirs(save_dir, exist_ok=True)
