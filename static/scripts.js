@@ -1,21 +1,23 @@
 function updateWordCount() {
-    var query = document.getElementById("queryInput").value;
-    var wordCount = query.trim() === "" ? 0 : query.trim().split(/\s+/).length;
+    var queryInput= document.getElementById("queryInput").value;
+    var wordCount = queryInput.trim() === "" ? 0 : queryInput.trim().split(/\s+/).length;
     document.getElementById("wordCount").innerText = `Number of Words: ${wordCount}`;
 }
 
 function sendQuery() {
-    var query = document.getElementById("queryInput").value;
+    var queryInput= document.getElementById("queryInput").value;
+    var datasetSelect = document.getElementById("datasetSelect").value;
 
-    if (query === "") {
+    if (queryInput=== "") {
         alert("Please enter a query.");
         return;
     }
-    fetch("http://localhost:8080/query", {
+    fetch("http://localhost:8080/count", {
         method: "POST",
         body: JSON.stringify({
-            length: query.length,
-            query: query
+            dataset: datasetSelect,
+            length: queryInput.length,
+            query: queryInput
         }),
         headers: {
             "Content-type": "application/json; charset=UTF-8"
@@ -23,6 +25,7 @@ function sendQuery() {
     })
     .then(response => response.json())
     .then(data => {
+        console.log(data)
         // Display number of occurrences
         document.getElementById('resultNum').innerText = `Number of Occurrences: ${data.occurrences}`;
 

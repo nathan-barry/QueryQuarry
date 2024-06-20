@@ -17,20 +17,16 @@ func NearbyWords(textFile, saFile *os.File, firstSAIndex, lastSAIndex int64) []s
 
 	pointerSize, _ := getSAInfo(textFile, saFile)
 
-	log.Println(lastSAIndex - firstSAIndex)
-
-	if lastSAIndex-firstSAIndex >= MAX_SENTENCES {
-		lastSAIndex = firstSAIndex + MAX_SENTENCES
+	if lastSAIndex-firstSAIndex+1 > MAX_SENTENCES {
+		lastSAIndex = firstSAIndex + MAX_SENTENCES - 1
 	}
 
-	log.Println(lastSAIndex - firstSAIndex)
-
-	sentences := make([]string, lastSAIndex-firstSAIndex)
+	sentences := make([]string, lastSAIndex-firstSAIndex+1)
 	buf := make([]byte, CONTEXT_SIZE)
 
 	// Loop through each occurrence
 	j := 0
-	for i := lastSAIndex; i > firstSAIndex; i-- {
+	for i := lastSAIndex; i >= firstSAIndex; i-- {
 		textIndex := readSuffixArray(saFile, pointerSize, i)
 
 		startIndex := textIndex - BEFORE_SIZE
