@@ -3,7 +3,6 @@ package search
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
 	"log"
 	"os"
 )
@@ -45,10 +44,8 @@ func findStartToken(textFile *os.File, seekPos, chunkSize int64) (uint32, int64)
 	startTokenPrefix := []byte{0xff, 0xff}
 	buf := make([]byte, chunkSize)
 
-	fmt.Println("-----------")
 	i := 0
 	for {
-		fmt.Println(i)
 		i++
 		if seekPos < chunkSize {
 			chunkSize = seekPos

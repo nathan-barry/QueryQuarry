@@ -20,8 +20,9 @@ func main() {
 		http.ServeFile(w, r, "./static/about.html")
 	})
 
-	// API endpoint
+	// API endpoints
 	http.HandleFunc("POST /query", handlers.QueryHandler)
+	http.HandleFunc("POST /csv", handlers.CSVHandler)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

@@ -14,7 +14,7 @@ import (
 	"github.com/nathan-barry/QueryQuarry/handlers"
 )
 
-const LOCALHOST = "http://localhost:8080/query"
+const LOCALHOST = "http://localhost:8080/csv"
 
 func main() {
 	// Read filename from command line

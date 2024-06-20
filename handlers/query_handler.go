@@ -43,6 +43,8 @@ func QueryHandler(w http.ResponseWriter, r *http.Request) {
 		count = lastSAIndex - firstSAIndex + 1
 		sentences = search.NearbyWords(textFile, saFile, firstSAIndex, lastSAIndex)
 	}
+
+	// Log information
 	log.Printf("QUERY: \"%v\", COUNT: %v, COUNT_TIME: %v, SENTENCE_TIME: %v",
 		reqData.Query, count, countTime, time.Since(t).Seconds())
 

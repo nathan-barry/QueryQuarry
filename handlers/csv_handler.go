@@ -38,20 +38,26 @@ func CSVHandler(w http.ResponseWriter, r *http.Request) {
 	csvWriter := csv.NewWriter(w)
 	defer csvWriter.Flush()
 
-	csvData := [][]string{{"DocID", "Document"}}
 	count := int64(0)
 	if firstSAIndex >= 0 && lastSAIndex >= 0 { // Both -1 if no occurrences
 		count = lastSAIndex - firstSAIndex + 1
 		docIDs, docPos := search.FindDocuments(textFile, saFile, firstSAIndex, lastSAIndex)
-		// GET THE CVS DATA HERE. TODO, WRITE FUNCTION
+
+		csvData := search.RetrieveDocuments(docIDs, docPos)
+		for _, record := range csvData {
+			if err := csvWriter.Write(record); err != nil {
+				http.Error(w, "Failed to write CSV data", http.StatusInternalServerError)
+			}
+		}
 	}
+
+	// Log information
 	log.Printf("QUERY: \"%v\", COUNT: %v, COUNT_TIME: %v, SENTENCE_TIME: %v",
 		reqData.Query, count, countTime, time.Since(t).Seconds())
 
 	// Send result back
-	// response := ResponseData{Occurrences: count, Sentences: sentences}
-	// w.Header().Set("Content-Type", "text/csv")
-
+	w.Header().Set("Content-Type", "text/csv")
+	w.Header().Set("Content-Disposition", "attachment;filename=data.csv")
 }
 
 type CSVResponseData struct {
