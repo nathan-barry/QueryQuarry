@@ -14,13 +14,24 @@ import (
 	"github.com/nathan-barry/QueryQuarry/handlers"
 )
 
-const LOCALHOST = "http://localhost:8080/csv"
+const LOCALHOST = "http://localhost:8080/"
+
+const (
+	COUNT = "count"
+	CSV   = "csv"
+)
 
 func main() {
 	// Read filename from command line
+	var action string
 	var filename string
+	flag.StringVar(&action, "action", "count", "Choose 'count' or 'csv'")
 	flag.StringVar(&filename, "file", "", "Path to file with queries")
 	flag.Parse()
+
+	if action != COUNT && action != CSV {
+		log.Fatal("invalid action")
+	}
 
 	// Open file
 	queryFile, err := os.Open(filename)
@@ -35,7 +46,7 @@ func main() {
 	// Loop through each query, make request
 	scanner := bufio.NewScanner(queryFile)
 	for scanner.Scan() {
-		fmt.Print(scanner.Text())
+		fmt.Printf("%s: ", scanner.Text())
 
 		// Create new request
 		requestData := handlers.RequestData{
@@ -47,7 +58,7 @@ func main() {
 			log.Fatal("Error marshalling json")
 		}
 
-		req, err := http.NewRequest("POST", LOCALHOST, bytes.NewBuffer(jsonData))
+		req, err := http.NewRequest("POST", LOCALHOST+action, bytes.NewBuffer(jsonData))
 		if err != nil {
 			log.Fatal("Error with new request")
 		}
@@ -62,14 +73,30 @@ func main() {
 
 		// Print result
 		if resp.StatusCode == http.StatusOK {
-			body, err := io.ReadAll(resp.Body)
-			if err != nil {
-				log.Fatal("Error reading from response body")
-			}
-			var responseData handlers.ResponseData
-			json.Unmarshal(body, &responseData)
+			switch action {
+			case COUNT:
+				body, err := io.ReadAll(resp.Body)
+				if err != nil {
+					log.Fatal("Error reading from response body")
+				}
 
-			fmt.Println(":", responseData.Occurrences)
+				var responseData handlers.ResponseData
+				json.Unmarshal(body, &responseData)
+
+				fmt.Println(responseData.Occurrences)
+			case CSV:
+				outFile, err := os.Create(filename + ".output.csv")
+				if err != nil {
+					log.Fatal("Error creating file")
+				}
+				defer outFile.Close()
+
+				_, err = io.Copy(outFile, resp.Body)
+				if err != nil {
+					log.Fatal("Error copying csv to out file")
+				}
+				fmt.Println("File downloaded successfully")
+			}
 		} else {
 			log.Fatal("Bad status code:", resp.StatusCode)
 		}

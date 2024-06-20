@@ -12,7 +12,7 @@ import (
 
 const WIKI_40B = "data/wiki40b.test"
 
-func QueryHandler(w http.ResponseWriter, r *http.Request) {
+func CountHandler(w http.ResponseWriter, r *http.Request) {
 	t := time.Now()
 
 	// Read body

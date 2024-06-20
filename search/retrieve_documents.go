@@ -12,10 +12,7 @@ const WIKI_40B = "data/wiki40b.test"
 const INT64_SIZE = 8
 
 func RetrieveDocuments(docIDs []uint32, docPos []int64) [][]string {
-	csvData := [][]string{{"DocID", "Document"}}
-
-	// Find the size by indexing into the dataset .size file and
-	// grabbing the DocID'th int, which is the number of bytes of the doc?
+	csvData := [][]string{{"DocID", "Document"}} // TODO: Make array with capacity
 
 	// Open files
 	textFile, err := os.Open(WIKI_40B)
@@ -31,15 +28,14 @@ func RetrieveDocuments(docIDs []uint32, docPos []int64) [][]string {
 
 	// Init buffers
 	s := make([]byte, 8)
-	startBuf := bytes.NewReader(s)
 	e := make([]byte, 8)
+	startBuf := bytes.NewReader(s)
 	endBuf := bytes.NewReader(e)
 
 	// Loop
 	for i := 0; i < len(docIDs); i++ {
-		fmt.Println("docIDs:", docIDs)
-		// Get Size
-		_, err = sizeFile.Seek(int64(docIDs[i])*8-8, 0)
+		// Get Start and End positions
+		_, err = sizeFile.Seek(int64(docIDs[i]-1)*INT64_SIZE, 0) // IDs start at 1, need to subtract 1 to index at 0
 		if err != nil {
 			log.Fatalf("failed to seek textFile: %v", err)
 		}
@@ -53,14 +49,12 @@ func RetrieveDocuments(docIDs []uint32, docPos []int64) [][]string {
 			log.Fatalf("failed to read bytes from textFile: %v", err)
 		}
 
-		// Read size
+		// Read bytes into int64
 		var startPos int64
 		var endPos int64
-		fmt.Printf("start: %x, \tend: %x\n", s, e)
 		binary.Read(startBuf, binary.LittleEndian, &startPos)
 		binary.Read(endBuf, binary.LittleEndian, &endPos)
 		docSize := endPos - startPos
-		fmt.Println("start:", startPos, "\tend:", endPos, "\tsize:", docSize)
 
 		// Get Document
 		docBuf := make([]byte, docSize)
@@ -74,14 +68,8 @@ func RetrieveDocuments(docIDs []uint32, docPos []int64) [][]string {
 			log.Fatalf("failed to read bytes from textFile: %v", err)
 		}
 
-		fmt.Println("DocPos actual:", docPos[i], "\tStartPos calculated:", startPos, "\tfirst - second =", docPos[i]-startPos)
-
 		csvData = append(csvData, []string{fmt.Sprint(docIDs[i]), string(docBuf)})
 	}
-
-	// Then disk seek to docPos and read size bytes into buffer
-
-	fmt.Println(csvData)
 
 	return csvData
 }

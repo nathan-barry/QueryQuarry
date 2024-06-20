@@ -21,7 +21,7 @@ func main() {
 	})
 
 	// API endpoints
-	http.HandleFunc("POST /query", handlers.QueryHandler)
+	http.HandleFunc("POST /count", handlers.CountHandler)
 	http.HandleFunc("POST /csv", handlers.CSVHandler)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
