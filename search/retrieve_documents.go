@@ -11,7 +11,7 @@ import (
 const WIKI_40B = "data/wiki40b.test"
 const INT64_SIZE = 8
 
-func RetrieveDocuments(docIDs []uint32, docPos []int64) [][]string {
+func RetrieveDocuments(docIDs []uint32) [][]string {
 	csvData := [][]string{{"DocID", "Document"}} // TODO: Make array with capacity
 
 	// Open files

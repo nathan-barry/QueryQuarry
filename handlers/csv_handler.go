@@ -41,9 +41,9 @@ func CSVHandler(w http.ResponseWriter, r *http.Request) {
 	count := int64(0)
 	if firstSAIndex >= 0 && lastSAIndex >= 0 { // Both -1 if no occurrences
 		count = lastSAIndex - firstSAIndex + 1
-		docIDs, docPos := search.FindDocuments(textFile, saFile, firstSAIndex, lastSAIndex)
+		docIDs := search.FindDocuments(textFile, saFile, firstSAIndex, lastSAIndex)
 
-		csvData := search.RetrieveDocuments(docIDs, docPos)
+		csvData := search.RetrieveDocuments(docIDs)
 		for _, record := range csvData {
 			if err := csvWriter.Write(record); err != nil {
 				http.Error(w, "Failed to write CSV data", http.StatusInternalServerError)
