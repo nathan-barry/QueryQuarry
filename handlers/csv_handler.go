@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"encoding/json"
+	"encoding/csv"
 	"log"
 	"net/http"
 	"os"
@@ -10,9 +10,7 @@ import (
 	"github.com/nathan-barry/QueryQuarry/search"
 )
 
-const WIKI_40B = "data/wiki40b.test"
-
-func QueryHandler(w http.ResponseWriter, r *http.Request) {
+func CSVHandler(w http.ResponseWriter, r *http.Request) {
 	t := time.Now()
 
 	// Read body
@@ -36,28 +34,33 @@ func QueryHandler(w http.ResponseWriter, r *http.Request) {
 	countTime := time.Since(t).Seconds()
 	t = time.Now()
 
-	// Get Nearby Words for Each Occurance
-	var sentences []string
+	// Get CSV Data
+	csvWriter := csv.NewWriter(w)
+	defer csvWriter.Flush()
+
+	csvData := [][]string{{"DocID", "Document"}}
 	count := int64(0)
 	if firstSAIndex >= 0 && lastSAIndex >= 0 { // Both -1 if no occurrences
 		count = lastSAIndex - firstSAIndex + 1
-		sentences = search.NearbyWords(textFile, saFile, firstSAIndex, lastSAIndex)
+		docIDs, docPos := search.FindDocuments(textFile, saFile, firstSAIndex, lastSAIndex)
+		// GET THE CVS DATA HERE. TODO, WRITE FUNCTION
 	}
 	log.Printf("QUERY: \"%v\", COUNT: %v, COUNT_TIME: %v, SENTENCE_TIME: %v",
 		reqData.Query, count, countTime, time.Since(t).Seconds())
 
 	// Send result back
-	response := ResponseData{Occurrences: count, Sentences: sentences}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	// response := ResponseData{Occurrences: count, Sentences: sentences}
+	// w.Header().Set("Content-Type", "text/csv")
+
 }
 
-type RequestData struct {
-	Length int64  `json:"length"`
-	Query  string `json:"query"`
-}
-
-type ResponseData struct {
+type CSVResponseData struct {
 	Occurrences int64    `json:"occurrences"`
 	Sentences   []string `json:"sentences"`
+}
+
+func generateCSVData() [][]string {
+	return [][]string{
+		{"DocID", "Document"},
+	}
 }

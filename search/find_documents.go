@@ -21,7 +21,7 @@ func FindDocuments(textFile, saFile *os.File, firstSAIndex, lastSAIndex int64) (
 	count := lastSAIndex - firstSAIndex + 1
 
 	docIDs := make([]uint32, count)
-	textStarts := make([]int64, count)
+	docPos := make([]int64, count)
 
 	pointerSize, _ := getSAInfo(textFile, saFile)
 
@@ -34,11 +34,11 @@ func FindDocuments(textFile, saFile *os.File, firstSAIndex, lastSAIndex int64) (
 
 		docID, startPos := findStartToken(textFile, textIndex, CHUNK_SIZE)
 		docIDs[j] = docID
-		textStarts[j] = startPos
+		docPos[j] = startPos
 		j++
 	}
 
-	return docIDs, textStarts
+	return docIDs, docPos
 }
 
 func findStartToken(textFile *os.File, seekPos, chunkSize int64) (uint32, int64) {
