@@ -8,23 +8,10 @@ import (
 	"os"
 )
 
-const WIKI_40B = "data/wiki40b.test"
 const INT64_SIZE = 8
 
-func RetrieveDocuments(docIDs []uint32) [][]string {
+func RetrieveDocuments(textFile, sizeFile *os.File, docIDs []uint32) [][]string {
 	csvData := [][]string{{"DocID", "Document"}} // TODO: Make array with capacity
-
-	// Open files
-	textFile, err := os.Open(WIKI_40B)
-	if err != nil {
-		log.Fatalf("failed to open file: %v", err)
-	}
-	defer textFile.Close()
-	sizeFile, err := os.Open(WIKI_40B + ".size")
-	if err != nil {
-		log.Fatalf("failed to open file: %v", err)
-	}
-	defer sizeFile.Close()
 
 	// Init buffers
 	s := make([]byte, 8)
@@ -35,7 +22,7 @@ func RetrieveDocuments(docIDs []uint32) [][]string {
 	// Loop
 	for i := 0; i < len(docIDs); i++ {
 		// Get Start and End positions
-		_, err = sizeFile.Seek(int64(docIDs[i]-1)*INT64_SIZE, 0) // IDs start at 1, need to subtract 1 to index at 0
+		_, err := sizeFile.Seek(int64(docIDs[i]-1)*INT64_SIZE, 0) // IDs start at 1, need to subtract 1 to index at 0
 		if err != nil {
 			log.Fatalf("failed to seek textFile: %v", err)
 		}

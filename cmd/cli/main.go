@@ -24,8 +24,10 @@ const (
 func main() {
 	// Read filename from command line
 	var action string
+	var dataset string
 	var filename string
-	flag.StringVar(&action, "action", "count", "Choose 'count' or 'csv'")
+	flag.StringVar(&action, "action", "count", "Choose action: 'count' or 'csv'")
+	flag.StringVar(&dataset, "data", "./data/wiki40b.test", "Enter path to dataset") // TODO: generalize this to any dataset in data dir
 	flag.StringVar(&filename, "file", "", "Path to file with queries")
 	flag.Parse()
 
@@ -50,8 +52,9 @@ func main() {
 
 		// Create new request
 		requestData := handlers.RequestData{
-			Length: int64(len(scanner.Text())),
-			Query:  scanner.Text(),
+			Dataset: dataset,
+			Length:  int64(len(scanner.Text())),
+			Query:   scanner.Text(),
 		}
 		jsonData, err := json.Marshal(requestData)
 		if err != nil {

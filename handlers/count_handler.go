@@ -10,8 +10,6 @@ import (
 	"github.com/nathan-barry/QueryQuarry/search"
 )
 
-const WIKI_40B = "data/wiki40b.test"
-
 func CountHandler(w http.ResponseWriter, r *http.Request) {
 	t := time.Now()
 
@@ -20,12 +18,12 @@ func CountHandler(w http.ResponseWriter, r *http.Request) {
 	getReqData(&reqData, w, r)
 
 	// Open files
-	textFile, err := os.Open(WIKI_40B)
+	textFile, err := os.Open(reqData.Dataset)
 	if err != nil {
 		log.Fatalf("failed to open file: %v", err)
 	}
 	defer textFile.Close()
-	saFile, err := os.Open(WIKI_40B + ".table.bin")
+	saFile, err := os.Open(reqData.Dataset + ".table.bin")
 	if err != nil {
 		log.Fatalf("failed to open file: %v", err)
 	}
@@ -55,8 +53,9 @@ func CountHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 type RequestData struct {
-	Length int64  `json:"length"`
-	Query  string `json:"query"`
+	Dataset string `json:"dataset"`
+	Length  int64  `json:"length"`
+	Query   string `json:"query"`
 }
 
 type ResponseData struct {

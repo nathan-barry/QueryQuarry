@@ -18,12 +18,12 @@ func CSVHandler(w http.ResponseWriter, r *http.Request) {
 	getReqData(&reqData, w, r)
 
 	// Open files
-	textFile, err := os.Open(WIKI_40B)
+	textFile, err := os.Open(reqData.Dataset)
 	if err != nil {
 		log.Fatalf("failed to open file: %v", err)
 	}
 	defer textFile.Close()
-	saFile, err := os.Open(WIKI_40B + ".table.bin")
+	saFile, err := os.Open(reqData.Dataset + ".table.bin")
 	if err != nil {
 		log.Fatalf("failed to open file: %v", err)
 	}
@@ -43,7 +43,13 @@ func CSVHandler(w http.ResponseWriter, r *http.Request) {
 		count = lastSAIndex - firstSAIndex + 1
 		docIDs := search.FindDocuments(textFile, saFile, firstSAIndex, lastSAIndex)
 
-		csvData := search.RetrieveDocuments(docIDs)
+		sizeFile, err := os.Open(reqData.Dataset + ".size")
+		if err != nil {
+			log.Fatalf("failed to open file: %v", err)
+		}
+		defer sizeFile.Close()
+
+		csvData := search.RetrieveDocuments(textFile, sizeFile, docIDs)
 		for _, record := range csvData {
 			if err := csvWriter.Write(record); err != nil {
 				http.Error(w, "Failed to write CSV data", http.StatusInternalServerError)
