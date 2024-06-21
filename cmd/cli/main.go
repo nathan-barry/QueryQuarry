@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -63,6 +64,7 @@ func main() {
 }
 
 func cmdCount(client *http.Client, scanner *bufio.Scanner, dataset string) {
+	// Loop through queries
 	for scanner.Scan() {
 		fmt.Printf("%s: ", scanner.Text())
 
@@ -92,19 +94,30 @@ func cmdCount(client *http.Client, scanner *bufio.Scanner, dataset string) {
 }
 
 func cmdCSV(client *http.Client, scanner *bufio.Scanner, dataset, filename string) {
+	// Create csv file
 	ext := path.Ext(filename)
-	outFile, err := os.Create(strings.TrimSuffix(filename, ext) + ".out.csv")
+	outFile, err := os.Create(strings.TrimSuffix(filename, ext) + "-results.csv")
 	if err != nil {
 		log.Fatal("Error creating file")
 	}
 	defer outFile.Close()
 
+	// Create CSV writer
+	writer := csv.NewWriter(outFile)
+	defer writer.Flush()
+
+	// Write CSV header
+	if err := writer.Write([]string{"queryID", "query", "docID", "document"}); err != nil {
+		log.Fatal("Error writing CSV record", err)
+	}
+
+	// Loop through queries
+	i := 0
 	for scanner.Scan() {
 		fmt.Printf("%s: ", scanner.Text())
 
-		req := createRequest(dataset, CSV, scanner)
-
 		// Send request to server
+		req := createRequest(dataset, CSV, scanner)
 		resp, err := client.Do(req)
 		if err != nil {
 			log.Fatal("Error sending request")
@@ -113,11 +126,23 @@ func cmdCSV(client *http.Client, scanner *bufio.Scanner, dataset, filename strin
 
 		// Do something with the response
 		if resp.StatusCode == http.StatusOK {
-			_, err = io.Copy(outFile, resp.Body)
-			if err != nil {
-				log.Fatal("Error copying csv to out file")
+			reader := csv.NewReader(resp.Body)
+			for {
+				record, err := reader.Read()
+				if err == io.EOF {
+					break
+				} else if err != nil {
+					log.Fatal("Error reading csv", err)
+				}
+
+				indexedRecord := append([]string{fmt.Sprint(i), scanner.Text()}, record...)
+				i++
+
+				if err := writer.Write(indexedRecord); err != nil {
+					log.Fatal("Error writing CSV record", err)
+				}
 			}
-			fmt.Println("File downloaded successfully")
+			fmt.Println("Successfully downloaded CSV")
 		} else {
 			log.Fatal("Bad status code:", resp.StatusCode)
 		}
