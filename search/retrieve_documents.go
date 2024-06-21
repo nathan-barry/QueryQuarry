@@ -3,6 +3,8 @@ package search
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/csv"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -10,9 +12,7 @@ import (
 
 const INT64_SIZE = 8
 
-func RetrieveDocuments(textFile, sizeFile *os.File, docIDs []uint32) [][]string {
-	csvData := [][]string{{"DocID", "Document"}} // TODO: Make array with capacity
-
+func RetrieveDocuments(csvWriter *csv.Writer, textFile, sizeFile *os.File, docIDs []uint32) error {
 	// Init buffers
 	s := make([]byte, 8)
 	e := make([]byte, 8)
@@ -55,8 +55,10 @@ func RetrieveDocuments(textFile, sizeFile *os.File, docIDs []uint32) [][]string 
 			log.Fatalf("failed to read bytes from textFile: %v", err)
 		}
 
-		csvData = append(csvData, []string{fmt.Sprint(docIDs[i]), string(docBuf)})
+		if err := csvWriter.Write([]string{fmt.Sprint(docIDs[i]), string(docBuf)}); err != nil {
+			return errors.New("Issue writing to csv writer") // TODO: Add more errors like this
+		}
 	}
 
-	return csvData
+	return nil
 }

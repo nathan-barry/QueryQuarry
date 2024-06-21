@@ -49,11 +49,8 @@ func CSVHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		defer sizeFile.Close()
 
-		csvData := search.RetrieveDocuments(textFile, sizeFile, docIDs)
-		for _, record := range csvData {
-			if err := csvWriter.Write(record); err != nil {
-				http.Error(w, "Failed to write CSV data", http.StatusInternalServerError)
-			}
+		if err := search.RetrieveDocuments(csvWriter, textFile, sizeFile, docIDs); err != nil {
+			http.Error(w, "Failed to write CSV data", http.StatusInternalServerError)
 		}
 	}
 
@@ -64,15 +61,4 @@ func CSVHandler(w http.ResponseWriter, r *http.Request) {
 	// Send result back
 	w.Header().Set("Content-Type", "text/csv")
 	w.Header().Set("Content-Disposition", "attachment;filename=data.csv")
-}
-
-type CSVResponseData struct {
-	Occurrences int64    `json:"occurrences"`
-	Sentences   []string `json:"sentences"`
-}
-
-func generateCSVData() [][]string {
-	return [][]string{
-		{"DocID", "Document"},
-	}
 }
