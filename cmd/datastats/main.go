@@ -9,12 +9,12 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math"
 	"os"
+	"slices"
 
 	"github.com/nathan-barry/QueryQuarry/search"
 )
-
-const TAG_SIZE = 6
 
 func main() {
 	// Read filename from command line
@@ -36,12 +36,12 @@ func main() {
 
 	textMetadata, err := textFile.Stat()
 	fmt.Println("File Name:", textMetadata.Name())
-	fmt.Println("Number of Bytes:", textMetadata.Size())
+	fmt.Println("\tNumber of Bytes:", textMetadata.Size())
 
 	sizeMetadata, err := sizeFile.Stat()
 	fmt.Println("File Name:", sizeMetadata.Name())
-	fmt.Println("Number of Bytes:", sizeMetadata.Size())
-	fmt.Println("Number of Documents (actual):", (sizeMetadata.Size()-1)/8)
+	fmt.Println("\tNumber of Bytes:", sizeMetadata.Size())
+	fmt.Println("Number of Documents:", (sizeMetadata.Size()-1)/8)
 
 	checkDocuments(textFile, sizeFile, (sizeMetadata.Size()-1)/8)
 }
@@ -111,10 +111,32 @@ func checkDocuments(textFile, sizeFile *os.File, numDocs int64) error {
 			log.Fatal("CONTAINS INVALID ID", i, numDocs, index)
 		}
 
-		// Count stats
 		docLengths[i] = int(docSize) - 6
 	}
+	fmt.Println("\tAll documents have valid IDs")
 
-	fmt.Println("All documents have valid IDs")
+	// Calculate average length and std
+	average := calcAverageLength(docLengths)
+	std := calcLengthStd(docLengths, average)
+
+	fmt.Printf("Doc Stats (in bytes):\n\tAvg. length: %v\n\tAvg. std: %v\n\tMax length: %v\n\tMin length: %v\n",
+		average, std, slices.Max(docLengths), slices.Min(docLengths))
+
 	return nil
+}
+
+func calcAverageLength(docLengths []int) float64 {
+	total := 0.0
+	for docLength := range docLengths {
+		total += float64(docLength)
+	}
+	return total / float64(len(docLengths))
+}
+
+func calcLengthStd(docLengths []int, average float64) float64 {
+	summation := 0.0
+	for docLength := range docLengths {
+		summation += math.Pow(float64(docLength)-average, 2)
+	}
+	return math.Sqrt(summation / float64(len(docLengths)))
 }
