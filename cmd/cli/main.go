@@ -136,13 +136,13 @@ func cmdCSV(client *http.Client, scanner *bufio.Scanner, dataset, filename strin
 				}
 
 				indexedRecord := append([]string{fmt.Sprint(i), scanner.Text()}, record...)
-				i++
 
 				if err := writer.Write(indexedRecord); err != nil {
 					log.Fatal("Error writing CSV record", err)
 				}
 			}
 			fmt.Println("Successfully downloaded CSV")
+			i++
 		} else {
 			log.Fatal("Bad status code:", resp.StatusCode)
 		}
