@@ -8,6 +8,7 @@ import (
 )
 
 const CHUNK_SIZE = 8192 // From a little testing, seems like a good size
+var StartTokenPrefix = []byte{0xff, 0xff}
 
 // This will return two arrays. []int DocIDs, []int textStarts
 // First is useful for figuring out size of document from the dataset.split.size file
@@ -39,7 +40,6 @@ func FindDocuments(textFile, saFile *os.File, firstSAIndex, lastSAIndex int64) [
 }
 
 func findDocID(textFile *os.File, seekPos, chunkSize int64) uint32 {
-	startTokenPrefix := []byte{0xff, 0xff}
 	buf := make([]byte, chunkSize)
 
 	i := 0
@@ -63,7 +63,7 @@ func findDocID(textFile *os.File, seekPos, chunkSize int64) uint32 {
 			log.Fatal("Error reading chunk in document for findStartToken")
 		}
 
-		index := bytes.LastIndex(buf[:n], startTokenPrefix)
+		index := bytes.LastIndex(buf[:n], StartTokenPrefix)
 		if index != -1 && index+6 <= n {
 			docID := binary.LittleEndian.Uint32(buf[index+2 : index+6])
 			return docID

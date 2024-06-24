@@ -14,33 +14,34 @@ const INT64_SIZE = 8
 
 func RetrieveDocuments(csvWriter *csv.Writer, textFile, sizeFile *os.File, docIDs []uint32) error {
 	// Init buffers
-	s := make([]byte, 8)
-	e := make([]byte, 8)
-	startBuf := bytes.NewReader(s)
-	endBuf := bytes.NewReader(e)
+	startBuf := make([]byte, 8)
+	endBuf := make([]byte, 8)
+	startReader := bytes.NewReader(startBuf)
+	endReader := bytes.NewReader(endBuf)
 
 	// Loop
 	for i := 0; i < len(docIDs); i++ {
 		// Get Start and End positions
 		_, err := sizeFile.Seek(int64(docIDs[i]-1)*INT64_SIZE, 0) // IDs start at 1, need to subtract 1 to index at 0
 		if err != nil {
-			log.Fatalf("failed to seek textFile: %v", err)
+			log.Fatalf("failed to seek sizeFile: %v", err)
 		}
 
-		_, err = sizeFile.Read(s)
+		fmt.Println("DocID:", docIDs[i], "\ttextStartPos:", int64(docIDs[i]-1)*INT64_SIZE)
+		_, err = sizeFile.Read(startBuf)
 		if err != nil {
-			log.Fatalf("failed to read bytes from textFile: %v", err)
+			log.Fatalf("failed to read bytes from sizeFile 1: %v", err)
 		}
-		_, err = sizeFile.Read(e)
+		_, err = sizeFile.Read(endBuf)
 		if err != nil {
-			log.Fatalf("failed to read bytes from textFile: %v", err)
+			log.Fatalf("failed to read bytes from sizeFile 2: %v", err)
 		}
 
 		// Read bytes into int64
 		var startPos int64
 		var endPos int64
-		binary.Read(startBuf, binary.LittleEndian, &startPos)
-		binary.Read(endBuf, binary.LittleEndian, &endPos)
+		binary.Read(startReader, binary.LittleEndian, &startPos)
+		binary.Read(endReader, binary.LittleEndian, &endPos)
 		docSize := endPos - startPos
 
 		// Get Document

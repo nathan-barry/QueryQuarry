@@ -67,7 +67,7 @@ fout = open(os.path.join(save_dir, dataset_name + "." + split), "wb")
 sizes = [0]
 
 for example in tqdm(ds):
-    out = example[key].encode("utf8")
+    out = example[key].encode("utf8") # should panic if invalid utf8?
     next_line = sep() + out
     fout.write(next_line)
     sizes.append(sizes[-1] + len(next_line))
