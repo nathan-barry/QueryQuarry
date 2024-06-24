@@ -29,6 +29,13 @@ func CSVHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer saFile.Close()
 
+	sizeFile, err := os.Open(reqData.Dataset + ".size")
+	if err != nil {
+		log.Fatalf("failed to open file: %v", err)
+	}
+	numDocs := search.GetNumDocs(sizeFile)
+	sizeFile.Close()
+
 	// Count occurrences
 	firstSAIndex, lastSAIndex := search.CountOccurrences(textFile, saFile, reqData.Query)
 	countTime := time.Since(t).Seconds()
@@ -41,7 +48,7 @@ func CSVHandler(w http.ResponseWriter, r *http.Request) {
 	count := int64(0)
 	if firstSAIndex >= 0 && lastSAIndex >= 0 { // Both -1 if no occurrences
 		count = lastSAIndex - firstSAIndex + 1
-		docIDs := search.FindDocuments(textFile, saFile, firstSAIndex, lastSAIndex)
+		docIDs := search.FindDocuments(textFile, saFile, firstSAIndex, lastSAIndex, numDocs)
 
 		sizeFile, err := os.Open(reqData.Dataset + ".size")
 		if err != nil {

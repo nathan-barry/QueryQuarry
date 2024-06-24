@@ -14,6 +14,8 @@ import (
 	"github.com/nathan-barry/QueryQuarry/search"
 )
 
+const TAG_SIZE = 6
+
 func main() {
 	// Read filename from command line
 	var dataset string
@@ -51,10 +53,11 @@ func checkDocuments(textFile, sizeFile *os.File, numDocs int64) error {
 	startReader := bytes.NewReader(startBuf)
 	endReader := bytes.NewReader(endBuf)
 
+	docLengths := make([]int, numDocs)
+
 	// Loop through each document
 	for i := int64(0); i < numDocs; i++ {
 		// Get Start and End positions
-
 		_, err := sizeFile.Seek(i*8, 0)
 		if err != nil {
 			log.Fatalf("failed to seek sizeFile: %v", err)
@@ -101,18 +104,17 @@ func checkDocuments(textFile, sizeFile *os.File, numDocs int64) error {
 			log.Fatalf("failed to read bytes from textFile: %v", err)
 		}
 
-		// Do
-		if bytes.Contains(docBuf[2:], search.StartTokenPrefix) {
-			index := bytes.Index(docBuf[2:], search.StartTokenPrefix)
-			fmt.Println("CONTAINS INVALID ID", i, numDocs, index)
-			fmt.Println(string(docBuf[index:]))
-			fmt.Println()
-			fmt.Println()
-			fmt.Println()
-			fmt.Println()
+		// Ensure no document has invalid startTokenPrefix tags
+		// NOTE: Should never panic, python preprocessing script ensures valid UTF8
+		if bytes.Contains(docBuf[6:], search.StartTokenPrefix) {
+			index := bytes.Index(docBuf[6:], search.StartTokenPrefix)
+			log.Fatal("CONTAINS INVALID ID", i, numDocs, index)
 		}
+
+		// Count stats
+		docLengths[i] = int(docSize) - 6
 	}
 
-	fmt.Println("End")
+	fmt.Println("All documents have valid IDs")
 	return nil
 }
