@@ -1,6 +1,7 @@
 package search
 
 import (
+	"bytes"
 	"log"
 	"os"
 )
@@ -42,7 +43,12 @@ func NearbyWords(textFile, saFile *os.File, firstSAIndex, lastSAIndex int64, que
 		if err != nil {
 			log.Fatal("Error reading nearby words")
 		}
-		before[j] = string(buf[:n])
+		// Cut off start document ID
+		if idx := bytes.LastIndex(buf, StartTokenPrefix); idx != -1 {
+			before[j] = string(buf[idx+6 : n])
+		} else {
+			before[j] = string(buf[:n])
+		}
 
 		// Read before sentence
 		startIndex = textIndex + int64(queryLength)
@@ -51,6 +57,10 @@ func NearbyWords(textFile, saFile *os.File, firstSAIndex, lastSAIndex int64, que
 		n, err = textFile.Read(buf)
 		if err != nil {
 			log.Fatal("Error reading nearby words")
+		}
+		// Cut off end document ID
+		if idx := bytes.Index(buf, StartTokenPrefix); idx != -1 {
+			n = idx
 		}
 		after[j] = string(buf[:n])
 
