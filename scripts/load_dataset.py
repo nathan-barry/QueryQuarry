@@ -19,11 +19,13 @@ import datasets
 import os
 import struct
 import numpy as np
+import time
 from tqdm import tqdm
 import glob
 
 import argparse
 
+start = time.time()
 
 FILE_EXTENSIONS = {"text": "txt", "json": "jsonl", "csv": "csv"}
 
@@ -74,3 +76,5 @@ for example in tqdm(ds):
 
 open(os.path.join(save_dir, dataset_name + "." + split + ".size"), "wb").write(
     np.array(sizes, dtype=np.uint64).tobytes())
+
+print("Time Taken:", time.time() - start)

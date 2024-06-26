@@ -18,6 +18,8 @@ import sys
 import multiprocessing as mp
 import numpy as np
 
+start = time.time()
+
 data_size = os.path.getsize(sys.argv[1])
 print("Data size:", data_size)
 
@@ -42,6 +44,7 @@ else:
 S = data_size//total_jobs
 
 
+print("Making Suffix Array Parts")
 for jobstart in range(0, total_jobs, jobs_at_once):
     wait = []
     for i in range(jobstart,jobstart+jobs_at_once):
@@ -80,6 +83,7 @@ while True:
             wait.append(os.popen(cmd))
             if len(wait) >= jobs_at_once:
                 break
+
     print("Rerunning", len(wait), "jobs because they failed.")
     [x.read() for x in wait]
     time.sleep(1)
@@ -95,16 +99,19 @@ if not os.path.exists("tmp"):
 os.popen("rm tmp/out.table.bin.*").read()
 
 torun = " --suffix-path ".join(files)
-print("./target/release/query_quarry merge --output-file %s --suffix-path %s --num-threads %d"%("tmp/out.table.bin", torun, mp.cpu_count()))
-pipe = os.popen("./target/release/query_quarry merge --output-file %s --suffix-path %s --num-threads %d"%("tmp/out.table.bin", torun, mp.cpu_count()))
+cmd = "./target/release/query_quarry merge --output-file %s --suffix-path %s --num-threads %d"%("tmp/out.table.bin", torun, mp.cpu_count())
+
+print(cmd)
+pipe = os.popen(cmd)
 output = pipe.read()
 if pipe.close() is not None:
     print("Something went wrong with merging.")
-    print("Please check that you ran with ulimit -Sn 100000")
+    print("Please check that you ran with ulimit -Sn 100000 (Required for large files)")
     exit(1)
-#exit(0)
+
 print("Now merging individual tables")
 os.popen("cat tmp/out.table.bin.* > tmp/out.table.bin").read()
+
 print("Cleaning up")
 os.popen("mv tmp/out.table.bin %s.table.bin"%sys.argv[1]).read()
 
@@ -115,3 +122,5 @@ if os.path.exists(sys.argv[1]+".table.bin"):
 else:
     print("Failed to create table")
     exit(1)
+
+print("Time Taken:", time.time() - start)
