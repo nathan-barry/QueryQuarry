@@ -62,7 +62,7 @@ func CSVHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Log information
-	log.Printf("QUERY: \"%v\", COUNT: %v, COUNT_TIME: %v, SENTENCE_TIME: %v",
+	log.Printf("QUERY: \"%v\", COUNT: %v, COUNT_TIME: %v, CSV_TIME: %v",
 		reqData.Query, count, countTime, time.Since(t).Seconds())
 
 	// Send result back

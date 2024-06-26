@@ -65,7 +65,7 @@ func main() {
 }
 
 func cmdCount(client *http.Client, scanner *bufio.Scanner, dataset string) {
-	start := time.Now()
+	t := time.Now()
 
 	// Loop through queries
 	for scanner.Scan() {
@@ -95,11 +95,11 @@ func cmdCount(client *http.Client, scanner *bufio.Scanner, dataset string) {
 		}
 	}
 
-	fmt.Println("Time Taken:", time.Since(start).Seconds())
+	fmt.Println("Time Taken:", time.Since(t).Seconds())
 }
 
 func cmdCSV(client *http.Client, scanner *bufio.Scanner, dataset, filename string) {
-	start := time.Now()
+	t := time.Now()
 
 	// Create csv file
 	ext := path.Ext(filename)
@@ -155,7 +155,7 @@ func cmdCSV(client *http.Client, scanner *bufio.Scanner, dataset, filename strin
 		}
 	}
 
-	fmt.Println("Time Taken:", time.Since(start).Seconds())
+	fmt.Println("Time Taken:", time.Since(t).Seconds())
 }
 
 func createRequest(dataset, action string, scanner *bufio.Scanner) *http.Request {
