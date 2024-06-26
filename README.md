@@ -45,3 +45,8 @@ To generate a CSV with all the documents where an occurrence occurred:
 ```
 go run cmd/cli/main.go -action csv -file ./queries/presidents.txt
 ```
+
+To view the CSV in a jupyter notebok:
+```
+jupyter notebook ./queries/presidents-results.ipynb
+```

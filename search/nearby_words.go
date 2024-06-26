@@ -7,7 +7,7 @@ import (
 
 const CONTEXT_SIZE = 128
 const BEFORE_SIZE = 32
-const MAX_SENTENCES = 128
+const MAX_SENTENCES = 64
 
 // Returns 128 bytes of text where the query appears
 func NearbyWords(textFile, saFile *os.File, firstSAIndex, lastSAIndex int64) []string {
