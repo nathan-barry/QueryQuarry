@@ -35,11 +35,12 @@ func CountHandler(w http.ResponseWriter, r *http.Request) {
 	t = time.Now()
 
 	// Get Nearby Words for Each Occurance
-	var sentences []string
+	var before []string
+	var after []string
 	count := int64(0)
 	if firstSAIndex >= 0 && lastSAIndex >= 0 { // Both -1 if no occurrences
 		count = lastSAIndex - firstSAIndex + 1
-		sentences = search.NearbyWords(textFile, saFile, firstSAIndex, lastSAIndex)
+		before, after = search.NearbyWords(textFile, saFile, firstSAIndex, lastSAIndex, len(reqData.Query))
 	}
 
 	// Log information
@@ -47,7 +48,12 @@ func CountHandler(w http.ResponseWriter, r *http.Request) {
 		reqData.Query, count, countTime, time.Since(t).Seconds())
 
 	// Send result back
-	response := ResponseData{Occurrences: count, Sentences: sentences}
+	response := ResponseData{
+		Occurrences: count,
+		Before:      before,
+		Query:       reqData.Query,
+		After:       after,
+	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
@@ -60,5 +66,7 @@ type RequestData struct {
 
 type ResponseData struct {
 	Occurrences int64    `json:"occurrences"`
-	Sentences   []string `json:"sentences"`
+	Before      []string `json:"before"`
+	Query       string   `json:"query"`
+	After       []string `json:"after"`
 }

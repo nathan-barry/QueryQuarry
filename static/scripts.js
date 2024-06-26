@@ -31,12 +31,12 @@ function sendQuery() {
 
         // Display sentences for each
         var sentences = ""
-        if (data.sentences != null) {
-            for (i=0; i<data.sentences.length; i++) {
-                sentences += `${i+1}: ...${data.sentences[i]}...\n\n`
+        if (data.before != null || data.afters != null) {
+            for (i=0; i<data.before.length; i++) {
+                sentences += `<b>${i+1}:</b> ...${data.before[i]} <span style="color: #f97316;"><b>${data.query}</b></span> ${data.after[i]}...<br><br>`
             }
         }
-        document.getElementById('resultSentences').innerText = sentences;
+        document.getElementById('resultSentences').innerHTML = sentences;
     })
     .catch(error => console.error("Error:", error))
 }
