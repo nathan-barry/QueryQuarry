@@ -32,9 +32,9 @@ func NearbyWords(textFile, saFile *os.File, firstSAIndex, lastSAIndex int64, que
 
 		// Read before sentence
 		startIndex := textIndex - CONTEXT_SIZE
-		n := CONTEXT_SIZE
+		readNum := CONTEXT_SIZE
 		if startIndex < 0 {
-			n = int(startIndex)
+			readNum = int(startIndex)
 			startIndex = 0
 		}
 		textFile.Seek(startIndex, 0)
@@ -45,16 +45,19 @@ func NearbyWords(textFile, saFile *os.File, firstSAIndex, lastSAIndex int64, que
 		}
 		// Cut off start document ID
 		if idx := bytes.LastIndex(buf, StartTokenPrefix); idx != -1 {
-			before[j] = string(buf[idx+6 : n])
+			if idx+6 > readNum {
+				idx = readNum - 6
+			}
+			before[j] = string(buf[idx+6 : readNum])
 		} else {
-			before[j] = string(buf[:n])
+			before[j] = string(buf[:readNum])
 		}
 
 		// Read before sentence
 		startIndex = textIndex + int64(queryLength)
 		textFile.Seek(startIndex, 0)
 
-		n, err = textFile.Read(buf)
+		n, err := textFile.Read(buf)
 		if err != nil {
 			log.Fatal("Error reading nearby words")
 		}
