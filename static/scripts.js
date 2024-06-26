@@ -33,7 +33,7 @@ function sendQuery() {
         var sentences = ""
         if (data.before != null || data.afters != null) {
             for (i=0; i<data.before.length; i++) {
-                sentences += `<b>${i+1}:</b> ...${data.before[i]} <span style="color: #f97316;"><b>${data.query}</b></span> ${data.after[i]}...<br><br>`
+                sentences += `<b>${i+1}:</b> ...${data.before[i]}<span style="color: #f97316;"><b>${data.query}</b></span>${data.after[i]}...<br><br>`
             }
         }
         document.getElementById('resultSentences').innerHTML = sentences;
