@@ -35,7 +35,7 @@ In the queries folder, we have a file containing the name of every U.S. Presiden
 
 To query using the client CLI:
 ```
-go run cmd/cli/main.go -file ./queries/presidents.txt
+go run cmd/cli/main.go --file ./queries/presidents.txt
 ```
 
 This prints the number of times each President's name has occurred in the Wiki40b test set.
@@ -43,7 +43,7 @@ This prints the number of times each President's name has occurred in the Wiki40
 To generate a CSV with all the documents where an occurrence occurred:
 
 ```
-go run cmd/cli/main.go -action csv -file ./queries/presidents.txt
+go run cmd/cli/main.go --action csv --file ./queries/presidents.txt
 ```
 
 To view the CSV in a jupyter notebok:

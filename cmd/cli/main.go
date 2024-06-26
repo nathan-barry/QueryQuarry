@@ -13,6 +13,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/nathan-barry/QueryQuarry/handlers"
 )
@@ -64,6 +65,8 @@ func main() {
 }
 
 func cmdCount(client *http.Client, scanner *bufio.Scanner, dataset string) {
+	start := time.Now()
+
 	// Loop through queries
 	for scanner.Scan() {
 		fmt.Printf("%s: ", scanner.Text())
@@ -91,9 +94,13 @@ func cmdCount(client *http.Client, scanner *bufio.Scanner, dataset string) {
 			log.Fatal("Bad status code:", resp.StatusCode)
 		}
 	}
+
+	fmt.Println("Time Taken:", time.Since(start).Seconds())
 }
 
 func cmdCSV(client *http.Client, scanner *bufio.Scanner, dataset, filename string) {
+	start := time.Now()
+
 	// Create csv file
 	ext := path.Ext(filename)
 	outFile, err := os.Create(strings.TrimSuffix(filename, ext) + "-results.csv")
@@ -147,6 +154,8 @@ func cmdCSV(client *http.Client, scanner *bufio.Scanner, dataset, filename strin
 			log.Fatal("Bad status code:", resp.StatusCode)
 		}
 	}
+
+	fmt.Println("Time Taken:", time.Since(start).Seconds())
 }
 
 func createRequest(dataset, action string, scanner *bufio.Scanner) *http.Request {
