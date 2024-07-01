@@ -20,17 +20,24 @@ func CountHandler(w http.ResponseWriter, r *http.Request) {
 	// Open files
 	textFile, err := os.Open(reqData.Dataset)
 	if err != nil {
-		log.Fatalf("failed to open file: %v", err)
+		http.Error(w, "Error opening dataset text file, does not exist", http.StatusNotFound)
+		return
 	}
 	defer textFile.Close()
+
 	saFile, err := os.Open(reqData.Dataset + ".table.bin")
 	if err != nil {
-		log.Fatalf("failed to open file: %v", err)
+		http.Error(w, "Error opening dataset SA file", http.StatusInternalServerError)
+		return
 	}
 	defer saFile.Close()
 
 	// Count occurrences
-	firstSAIndex, lastSAIndex := search.CountOccurrences(textFile, saFile, reqData.Query)
+	firstSAIndex, lastSAIndex, err := search.CountOccurrences(textFile, saFile, reqData.Query)
+	if err != nil {
+		http.Error(w, "Error counting occurrences", http.StatusInternalServerError)
+		return
+	}
 	countTime := time.Since(t).Seconds()
 	t = time.Now()
 
@@ -40,7 +47,11 @@ func CountHandler(w http.ResponseWriter, r *http.Request) {
 	count := int64(0)
 	if firstSAIndex >= 0 && lastSAIndex >= 0 { // Both -1 if no occurrences
 		count = lastSAIndex - firstSAIndex + 1
-		before, after = search.NearbyWords(textFile, saFile, firstSAIndex, lastSAIndex, len(reqData.Query))
+		before, after, err = search.NearbyWords(textFile, saFile, firstSAIndex, lastSAIndex, len(reqData.Query))
+		if err != nil {
+			http.Error(w, "Error when finding nearby words", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	// Log information

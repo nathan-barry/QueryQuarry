@@ -60,7 +60,7 @@ func main() {
 	}
 
 	if err := scanner.Err(); err != nil {
-		log.Fatalf("error reading the file: %s", err)
+		log.Fatalf("error reading the file of queries: %s", err)
 	}
 }
 
@@ -79,19 +79,20 @@ func cmdCount(client *http.Client, scanner *bufio.Scanner, dataset string) {
 		}
 		defer resp.Body.Close()
 
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatal("Error reading from response body")
+		}
+
 		// Do something with the response
 		if resp.StatusCode == http.StatusOK {
-			body, err := io.ReadAll(resp.Body)
-			if err != nil {
-				log.Fatal("Error reading from response body")
-			}
-
 			var responseData handlers.ResponseData
 			json.Unmarshal(body, &responseData)
 
 			fmt.Println(responseData.Occurrences)
 		} else {
-			log.Fatal("Bad status code:", resp.StatusCode)
+			fmt.Println()
+			log.Fatalf("Bad status code: %v\nError Message: %v\n", resp.Status, string(body))
 		}
 	}
 
@@ -151,7 +152,12 @@ func cmdCSV(client *http.Client, scanner *bufio.Scanner, dataset, filename strin
 			fmt.Println("Successfully downloaded CSV")
 			i++
 		} else {
-			log.Fatal("Bad status code:", resp.StatusCode)
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				log.Fatal("Error reading from response body")
+			}
+			fmt.Println()
+			log.Fatalf("\nBad status code: %v\nError Message: %v\n", resp.Status, string(body))
 		}
 	}
 

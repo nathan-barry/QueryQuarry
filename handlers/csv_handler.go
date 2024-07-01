@@ -20,24 +20,37 @@ func CSVHandler(w http.ResponseWriter, r *http.Request) {
 	// Open files
 	textFile, err := os.Open(reqData.Dataset)
 	if err != nil {
-		log.Fatalf("failed to open file: %v", err)
+		http.Error(w, "Error opening dataset text file, does not exist", http.StatusNotFound)
+		return
 	}
 	defer textFile.Close()
+
 	saFile, err := os.Open(reqData.Dataset + ".table.bin")
 	if err != nil {
-		log.Fatalf("failed to open file: %v", err)
+		http.Error(w, "Error opening dataset SA file", http.StatusInternalServerError)
+		return
 	}
 	defer saFile.Close()
 
 	sizeFile, err := os.Open(reqData.Dataset + ".size")
 	if err != nil {
-		log.Fatalf("failed to open file: %v", err)
+		http.Error(w, "Error opening dataset size file", http.StatusInternalServerError)
+		return
 	}
-	numDocs := search.GetNumDocs(sizeFile)
-	sizeFile.Close()
+	defer sizeFile.Close()
+
+	numDocs, err := search.GetNumDocs(sizeFile)
+	if err != nil {
+		http.Error(w, "Error when getting number of documents", http.StatusInternalServerError)
+		return
+	}
 
 	// Count occurrences
-	firstSAIndex, lastSAIndex := search.CountOccurrences(textFile, saFile, reqData.Query)
+	firstSAIndex, lastSAIndex, err := search.CountOccurrences(textFile, saFile, reqData.Query)
+	if err != nil {
+		http.Error(w, "Error when counting occurrences", http.StatusInternalServerError)
+		return
+	}
 	countTime := time.Since(t).Seconds()
 	t = time.Now()
 
@@ -48,16 +61,15 @@ func CSVHandler(w http.ResponseWriter, r *http.Request) {
 	count := int64(0)
 	if firstSAIndex >= 0 && lastSAIndex >= 0 { // Both -1 if no occurrences
 		count = lastSAIndex - firstSAIndex + 1
-		docIDs := search.FindDocuments(textFile, saFile, firstSAIndex, lastSAIndex, numDocs)
-
-		sizeFile, err := os.Open(reqData.Dataset + ".size")
+		docIDs, err := search.FindDocuments(textFile, saFile, firstSAIndex, lastSAIndex, numDocs)
 		if err != nil {
-			log.Fatalf("failed to open file: %v", err)
+			http.Error(w, "Error when finding documents", http.StatusInternalServerError)
+			return
 		}
-		defer sizeFile.Close()
 
 		if err := search.RetrieveDocuments(csvWriter, textFile, sizeFile, docIDs); err != nil {
 			http.Error(w, "Failed to write CSV data", http.StatusInternalServerError)
+			return
 		}
 	}
 

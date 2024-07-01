@@ -6,7 +6,6 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 )
 
@@ -24,27 +23,28 @@ func RetrieveDocuments(csvWriter *csv.Writer, textFile, sizeFile *os.File, docID
 		// Get Start and End positions
 		_, err := sizeFile.Seek(int64(docIDs[i]-1)*INT64_SIZE, 0) // IDs start at 1, need to subtract 1 to index at 0
 		if err != nil {
-			log.Fatalf("failed to seek sizeFile: %v", err)
+			return err
 		}
 
 		_, err = sizeFile.Read(startBuf)
 		if err != nil {
-			log.Fatalf("failed to read bytes from sizeFile 1: %v", err)
+			return err
 		}
 		_, err = sizeFile.Read(endBuf)
 		if err != nil {
-			log.Fatalf("failed to read bytes from sizeFile 2: %v", err)
+			return err
 		}
 
 		// Read bytes into int64
 		_, err = startReader.Seek(0, 0)
 		if err != nil {
-			log.Fatalf("failed to seek to start of reader: %v", err)
+			return err
 		}
 		_, err = endReader.Seek(0, 0)
 		if err != nil {
-			log.Fatalf("failed to seek start of reader: %v", err)
+			return err
 		}
+
 		var startPos int64
 		var endPos int64
 		binary.Read(startReader, binary.LittleEndian, &startPos)
@@ -55,20 +55,20 @@ func RetrieveDocuments(csvWriter *csv.Writer, textFile, sizeFile *os.File, docID
 		docBuf := make([]byte, docSize)
 		_, err = textFile.Seek(startPos, 0)
 		if err != nil {
-			log.Fatalf("failed to seek textFile: %v", err)
+			return err
 		}
 
 		_, err = textFile.Read(docBuf)
 		if err != nil {
-			log.Fatalf("failed to read bytes from textFile: %v", err)
+			return err
 		}
 
 		if len(docBuf) < 6 {
-			log.Fatalf("DocBuf shorter than tag\n\tlength: %v, contents: %v, docId: %v", len(string(docBuf)), string(docBuf), docIDs[i])
+			return errors.New("search.NearbyWords: DocBuf shorter than tag")
 		}
 
 		if err := csvWriter.Write([]string{fmt.Sprint(docIDs[i]), string(docBuf[6:])}); err != nil {
-			return errors.New("Issue writing to csv writer") // TODO: Add more errors like this
+			return errors.New("search.NearbyWords: Issue writing to csv writer")
 		}
 	}
 
