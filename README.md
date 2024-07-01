@@ -34,15 +34,11 @@ To count all occurrences for all queries in a file on a dataset:
 ```
 go run cmd/cli/main.go --action count --data data/wiki40b.test --file queries/presidents.txt
 ```
-As an example, we have a file containing the name of every U.S. President in the queries folder.
-
-To generate a CSV with all the documents where an occurrence occurred on:
+As an example, we have a file containing the name of every U.S. President in the queries folder. To generate a CSV with all the documents where an occurrence occurred on:
 ```
 go run cmd/cli/main.go --action csv --data data/wiki40b.test --file queries/presidents.txt
 ```
-This command creates a new CSV file named `presidents-results.csv`
-
-To view the CSV in a jupyter notebok for this :
+This command creates a new CSV file named `presidents-results.csv`. To view it in a jupyter notebook:
 ```
 jupyter notebook queries/presidents-results.ipynb
 ```
