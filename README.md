@@ -6,6 +6,12 @@ This repo is for running a service that allows people to search whether a given 
 
 ## Quickstart
 
+Download the required dependencies and build the rust binary:
+```
+pip install datasets
+cargo build --release
+```
+
 ### Constructing the Suffix Array
 To download and preprocess a HuggingFace dataset (in this case wiki40b):
 ```
