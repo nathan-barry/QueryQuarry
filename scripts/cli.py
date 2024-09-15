@@ -4,6 +4,7 @@ import json
 import os
 import sys
 import time
+import base64
 from pathlib import Path
 
 import requests
@@ -44,11 +45,12 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def create_request_payload(dataset, query):
+def create_request_payload(dataset, query, tokenize):
     return {
         "Dataset": dataset,
         "Length": len(query),
         "Query": query,
+        "Tokenize": tokenize
     }
 
 
@@ -65,9 +67,10 @@ def cmd_count(client, queries, dataset, tokenizer_name):
             from transformers import AutoTokenizer
             import numpy as np
             tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
-            query = str(np.array(tokenizer.encode(query), dtype=np.uint16).view(np.uint8).tobytes())
+            byte_data = np.array(tokenizer.encode(query), dtype=np.uint16).view(np.uint8).tobytes()
+            query = base64.b64encode(byte_data).decode('utf-8')
 
-        payload = create_request_payload(dataset, query)
+        payload = create_request_payload(dataset, query, tokenizer_name != "")
         try:
             response = client.post(
                 f"{LOCALHOST}{COUNT}",

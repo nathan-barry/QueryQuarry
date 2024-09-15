@@ -45,8 +45,10 @@ func CSVHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	query := []byte(reqData.Query) // TODO: Tokenize this check
+
 	// Count occurrences
-	firstSAIndex, lastSAIndex, err := search.CountOccurrences(textFile, saFile, reqData.Query)
+	firstSAIndex, lastSAIndex, err := search.CountOccurrences(textFile, saFile, query)
 	if err != nil {
 		http.Error(w, "Error when counting occurrences", http.StatusInternalServerError)
 		return

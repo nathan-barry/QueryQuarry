@@ -1,6 +1,7 @@
 package search
 
 import (
+	"bytes"
 	"encoding/binary"
 	"os"
 )
@@ -8,7 +9,7 @@ import (
 // NOTE: This function allows overlapping sequences to count as different duplicates.
 // So if our string is `aaaa` and we count how many times `aa` occurs, it will return 3,
 // not 2. This is different from python's "aaaa".count("aa") which will say 2.
-func CountOccurrences(textFile, saFile *os.File, query string) (int64, int64, error) {
+func CountOccurrences(textFile, saFile *os.File, query []byte) (int64, int64, error) {
 	pointerSize, saSize, err := getSAInfo(textFile, saFile)
 	if err != nil {
 		return 0, 0, err
@@ -31,12 +32,13 @@ func CountOccurrences(textFile, saFile *os.File, query string) (int64, int64, er
 			querySize = saSize - textIndex
 		}
 
-		substr, err := readText(textFile, textIndex, querySize)
+		subByteArr, err := readText(textFile, textIndex, querySize)
 		if err != nil {
 			return 0, 0, err
 		}
 
-		if substr == query {
+		cond := bytes.Compare(subByteArr, query)
+		if cond == 0 {
 			// Match, perform binary search twice to find count
 			firstSAIndex, err := findFirstOccurrence(textFile, saFile, pointerSize, saSize, mid, query)
 			if err != nil {
@@ -47,7 +49,7 @@ func CountOccurrences(textFile, saFile *os.File, query string) (int64, int64, er
 				return 0, 0, err
 			}
 			return firstSAIndex, LastSAIndex, nil
-		} else if substr < query {
+		} else if cond < 0 {
 			low = mid + 1
 		} else {
 			high = mid - 1
@@ -57,7 +59,7 @@ func CountOccurrences(textFile, saFile *os.File, query string) (int64, int64, er
 	return -1, -1, nil
 }
 
-func findFirstOccurrence(textFile, saFile *os.File, pointerSize, saSize, mid int64, query string) (int64, error) {
+func findFirstOccurrence(textFile, saFile *os.File, pointerSize, saSize, mid int64, query []byte) (int64, error) {
 	firstOccurrence := mid
 
 	// Binary search
@@ -75,15 +77,16 @@ func findFirstOccurrence(textFile, saFile *os.File, pointerSize, saSize, mid int
 			querySize = saSize - textIndex
 		}
 
-		substr, err := readText(textFile, textIndex, querySize)
+		subByteArr, err := readText(textFile, textIndex, querySize)
 		if err != nil {
 			return 0, err
 		}
 
-		if substr == query {
+		cond := bytes.Compare(subByteArr, query)
+		if cond == 0 {
 			firstOccurrence = mid
 			high = mid - 1 // continue searching left half
-		} else if substr < query {
+		} else if cond < 0 {
 			low = mid + 1
 		} else {
 			high = mid - 1
@@ -93,7 +96,7 @@ func findFirstOccurrence(textFile, saFile *os.File, pointerSize, saSize, mid int
 	return firstOccurrence, nil
 }
 
-func findLastOccurrence(textFile, saFile *os.File, pointerSize, saSize, mid int64, query string) (int64, error) {
+func findLastOccurrence(textFile, saFile *os.File, pointerSize, saSize, mid int64, query []byte) (int64, error) {
 	lastOccurrence := mid
 
 	// Binary search
@@ -111,15 +114,16 @@ func findLastOccurrence(textFile, saFile *os.File, pointerSize, saSize, mid int6
 			querySize = saSize - textIndex
 		}
 
-		substr, err := readText(textFile, textIndex, querySize)
+		subByteArr, err := readText(textFile, textIndex, querySize)
 		if err != nil {
 			return 0, err
 		}
 
-		if substr == query {
+		cond := bytes.Compare(subByteArr, query)
+		if cond == 0 {
 			lastOccurrence = mid
 			low = mid + 1 // continue searching right half
-		} else if substr < query {
+		} else if cond < 0 {
 			low = mid + 1
 		} else {
 			high = mid - 1
@@ -162,17 +166,17 @@ func readSuffixArray(saFile *os.File, pointerSize, index int64) (int64, error) {
 	return int64(binary.LittleEndian.Uint64(fullBuf)), nil
 }
 
-func readText(textFile *os.File, start, length int64) (string, error) {
+func readText(textFile *os.File, start, length int64) ([]byte, error) {
 	_, err := textFile.Seek(start, 0)
 	if err != nil {
-		return "", err
+		return []byte{}, err
 	}
 
 	buf := make([]byte, length) // TODO, move this out and reuse
 	_, err = textFile.Read(buf)
 	if err != nil {
-		return "", err
+		return []byte{}, err
 	}
 
-	return string(buf), nil
+	return buf, nil
 }
