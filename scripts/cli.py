@@ -52,7 +52,7 @@ def create_request_payload(dataset, query):
     }
 
 
-def cmd_count(client, queries, dataset, tokenizer):
+def cmd_count(client, queries, dataset, tokenizer_name):
     start_time = time.time()
 
     for query in queries:
@@ -61,10 +61,10 @@ def cmd_count(client, queries, dataset, tokenizer):
             continue
         print(f"{query}: ", end="")
 
-        if tokenizer:
-            from transformers import GPT2Tokenizer
+        if tokenizer_name:
+            from transformers import AutoTokenizer
             import numpy as np
-            tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+            tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
             query = str(np.array(tokenizer.encode(query), dtype=np.uint16).view(np.uint8).tobytes())
 
         payload = create_request_payload(dataset, query)
