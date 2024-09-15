@@ -35,6 +35,12 @@ def parse_arguments():
         required=True,
         help="Path to file with queries",
     )
+    parser.add_argument(
+        "-tokenize",
+        type=str,
+        default="",
+        help="Tokenizer name",
+    )
     return parser.parse_args()
 
 
@@ -46,7 +52,7 @@ def create_request_payload(dataset, query):
     }
 
 
-def cmd_count(client, queries, dataset):
+def cmd_count(client, queries, dataset, tokenizer):
     start_time = time.time()
 
     for query in queries:
@@ -54,6 +60,12 @@ def cmd_count(client, queries, dataset):
         if not query:
             continue
         print(f"{query}: ", end="")
+
+        if tokenizer:
+            from transformers import GPT2Tokenizer
+            import numpy as np
+            tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+            query = str(np.array(tokenizer.encode(query), dtype=np.uint16).view(np.uint8).tobytes())
 
         payload = create_request_payload(dataset, query)
         try:
@@ -155,6 +167,7 @@ def main():
 
     dataset = args.data
     filename = args.file
+    tokenizer = args.tokenize
 
     if not os.path.isfile(filename):
         sys.exit(f"Error opening the following file: {filename}")
@@ -169,7 +182,7 @@ def main():
     client = requests.Session()
 
     if args.action == COUNT:
-        cmd_count(client, queries, dataset)
+        cmd_count(client, queries, dataset, tokenizer)
     elif args.action == CSV_ACTION:
         cmd_csv(client, queries, dataset, filename)
 
