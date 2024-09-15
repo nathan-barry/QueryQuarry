@@ -18,7 +18,7 @@ import (
 	"github.com/nathan-barry/QueryQuarry/handlers"
 )
 
-const LOCALHOST = "http://localhost:8080/"
+const LOCALHOST = "http://localhost:8081/"
 
 const (
 	COUNT = "count"

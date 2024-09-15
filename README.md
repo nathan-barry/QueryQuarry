@@ -32,7 +32,7 @@ To start the server:
 ```
 go run cmd/server/main.go
 ```
-You can see an interactive front-end by going to `http://localhost:8080`.
+You can see an interactive front-end by going to `http://localhost:8081`.
 
 
 ### Using the Client CLI

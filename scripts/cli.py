@@ -9,7 +9,7 @@ from pathlib import Path
 
 import requests
 
-LOCALHOST = "http://localhost:8080/"
+LOCALHOST = "http://localhost:8081/"
 
 COUNT = "count"
 CSV_ACTION = "csv"
@@ -57,6 +57,11 @@ def create_request_payload(dataset, query, tokenize):
 def cmd_count(client, queries, dataset, tokenizer_name):
     start_time = time.time()
 
+    if tokenizer_name:
+        from transformers import AutoTokenizer
+        import numpy as np
+        tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
+
     for query in queries:
         query = query.strip()
         if not query:
@@ -64,9 +69,6 @@ def cmd_count(client, queries, dataset, tokenizer_name):
         print(f"{query}: ", end="")
 
         if tokenizer_name:
-            from transformers import AutoTokenizer
-            import numpy as np
-            tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
             byte_data = np.array(tokenizer.encode(query), dtype=np.uint16).view(np.uint8).tobytes()
             query = base64.b64encode(byte_data).decode('utf-8')
 

@@ -12,7 +12,7 @@ function sendQuery() {
         alert("Please enter a query.");
         return;
     }
-    fetch("http://localhost:8080/count", {
+    fetch("http://localhost:8081/count", {
         method: "POST",
         body: JSON.stringify({
             dataset: datasetSelect,
