@@ -38,15 +38,20 @@ You can see an interactive front-end by going to `http://localhost:8081`.
 ### Using the Client CLI
 To count all occurrences for all queries in a file on a dataset:
 ```
-go run cmd/cli/main.go --action count --data data/wiki40b.test --file queries/presidents.txt
+python3 scripts/cli.py -action count -data data/wiki40b.test -file queries/presidents.txt
 ```
 As an example, we have a file containing the name of every U.S. President in the queries folder. To generate a CSV with all the documents where an occurrence occurred on:
 ```
-go run cmd/cli/main.go --action csv --data data/wiki40b.test --file queries/presidents.txt
+python3 scripts/cli.py -action csv -data data/wiki40b.test -file queries/presidents.txt
 ```
 This command creates a new CSV file named `presidents-results.csv`. To view it in a jupyter notebook:
 ```
 jupyter notebook queries/presidents-results.ipynb
+```
+
+To add tokenization, add the HuggingFace AutoTokenizer (using `gpt-neox-20b` for this example):
+```
+python3 scripts/cli.py -action count -data data/dclm-baseline-sample_1 -file queries/presidents.txt -tokenize EleutherAI/gpt-neox-20b
 ```
 
 
