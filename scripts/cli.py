@@ -1,10 +1,10 @@
-import argparse
-import csv
 import json
 import os
 import sys
 import time
 import base64
+import argparse
+import csv
 from pathlib import Path
 
 import requests
@@ -105,7 +105,7 @@ def cmd_count(client, queries, dataset, tokenizer_name):
     print(f"Time Taken: {end_time - start_time:.2f} seconds")
 
 
-def cmd_csv(client, queries, dataset, input_filename):
+def cmd_csv(client, queries, dataset, tokenizer_name, input_filename):
     start_time = time.time()
 
     input_path = Path(input_filename)
@@ -124,7 +124,7 @@ def cmd_csv(client, queries, dataset, input_filename):
                     continue
                 print(f"{query}: ", end="")
 
-                payload = create_request_payload(dataset, query)
+                payload = create_request_payload(dataset, query, tokenizer_name != "")
                 try:
                     response = client.post(
                         f"{LOCALHOST}{CSV_ACTION}",
@@ -189,7 +189,7 @@ def main():
     if args.action == COUNT:
         cmd_count(client, queries, dataset, tokenizer)
     elif args.action == CSV_ACTION:
-        cmd_csv(client, queries, dataset, filename)
+        cmd_csv(client, queries, dataset, tokenizer, filename)
 
 
 if __name__ == "__main__":
