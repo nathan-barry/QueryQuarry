@@ -112,9 +112,13 @@ def cmd_csv(client, queries, dataset, tokenizer_name, input_filename):
     output_filename = input_path.stem + "-results.csv"
     output_path = input_path.with_name(output_filename)
 
+    # Increase the maximum field size limit
+    csv.field_size_limit(sys.maxsize)
+
     try:
         with open(output_path, mode="w", newline="", encoding="utf-8") as out_file:
             writer = csv.writer(out_file)
+
             # Write CSV header
             writer.writerow(["queryID", "query", "docID", "document"])
 
@@ -145,7 +149,7 @@ def cmd_csv(client, queries, dataset, tokenizer_name, input_filename):
                             query_id = i
                             writer.writerow([query_id, query] + record)
                             records_written += 1
-                        print("Successfully downloaded CSV")
+                        print("Successfully added to CSV")
                     except Exception as e:
                         sys.exit(f"Error processing CSV response: {e}")
                 else:
