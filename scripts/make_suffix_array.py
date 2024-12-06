@@ -23,8 +23,7 @@ start = time.time()
 data_size = os.path.getsize(sys.argv[1])
 print("Data size:", data_size)
 
-HACK = 100000
-
+HACK = 100000 # Read docs of rust implementation
 
 started = []
 
@@ -42,7 +41,6 @@ else:
     jobs_at_once = 1
 
 S = data_size//total_jobs
-
 
 print("Making Suffix Array Parts")
 for jobstart in range(0, total_jobs, jobs_at_once):
@@ -89,7 +87,6 @@ while True:
     time.sleep(1)
     if len(wait) == 0:
         break
-        
 
 print("Merging suffix trees")
 

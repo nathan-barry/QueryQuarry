@@ -1,6 +1,6 @@
 // This command returns various information about a dataset
 // 1. Number of Bytes, Number of documents, average size and variance
-// 2. Verifies unique IDs
+// 2. Verifies unique IDs (should always be correct from load_dataset.py)
 package main
 
 import (
